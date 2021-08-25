@@ -1,4 +1,3 @@
-#include<stdio.h>
 #include <stdlib.h>
 #include<string.h>
 #include "tokens.h"
@@ -67,15 +66,17 @@ Token getKeywordIfPresent(char* lexeme) {
     }
 }
 
-//debug
-void printKeywordTable() {
+void freeKeywordBucket(int bucketNo) {
+    keywordEntry* head = keywordTable[bucketNo];
+    while(head != NULL) {
+        keywordEntry* temp = head;
+        head = head ->next;
+        free(temp);
+    }
+}
+
+void freeKeywordTable() {
     for(int i = 0; i < NUM_BUCKETS; i++) {
-        printf("Bucket %d: ", i);
-        keywordEntry* head = keywordTable[i];
-        while(head != NULL) {
-            printf("%s ", head->str);
-            head = head ->next;
-        }
-        printf("\n");
+        freeKeywordBucket(i);
     }
 }
