@@ -427,9 +427,9 @@ void findAndAddTokens() {
                 dfaState = 0;
                 break;
             case 32:
-                if (c != '\n') {
-                    c = nextChar();
-                } else {
+                c = nextChar();
+                skipChar();
+                if (c == '\n') {
                     lineNo++;
                     dfaState = 0;
                     break;
