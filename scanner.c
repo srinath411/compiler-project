@@ -5,7 +5,7 @@
 
 char readBuf[READ_BUF_SIZE];
 char* lexemeBuf;
-int startIndex, currentIndex, exceeded, isLexemeBufSet;
+int startIndex, currentIndex;
 FILE *fp;
 
 int initScanner(char* filename) {
@@ -14,7 +14,7 @@ int initScanner(char* filename) {
         return 1;
     }
     readBuf[0] = '\0';
-    startIndex = currentIndex = exceeded = isLexemeBufSet = 0;
+    startIndex = currentIndex = 0;
     lexemeBuf = NULL;
     return 0;
 }
@@ -67,7 +67,6 @@ char nextChar() {
             return readBuf[currentIndex++];
         }
     } else {
-        isLexemeBufSet = 0;
         return readBuf[currentIndex++];
     }
 }
@@ -77,9 +76,7 @@ void skipChar() {
 }
 
 void retractChar() {
-    if (exceeded == 1) {
-        exceeded = 0;
-    } else if (currentIndex > startIndex) {
+    if (currentIndex > startIndex) {
         currentIndex--;
     }
 }
