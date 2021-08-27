@@ -4,7 +4,8 @@
 #define READ_BUF_SIZE 1024
 
 char readBuf[READ_BUF_SIZE];
-int startIndex, currentIndex, exceeded;
+char* lexemeBuf;
+int startIndex, currentIndex, exceeded, isLexemeBufSet;
 FILE *fp;
 
 int initScanner(char* filename) {
@@ -13,7 +14,8 @@ int initScanner(char* filename) {
         return 1;
     }
     readBuf[0] = '\0';
-    startIndex = currentIndex = exceeded = 0;
+    startIndex = currentIndex = exceeded = isLexemeBufSet = 0;
+    lexemeBuf = NULL;
     return 0;
 }
 
@@ -22,23 +24,50 @@ void closeScanner() {
         fclose(fp);
         fp = NULL;
     }
+    lexemeBuf = NULL;
+}
+
+void concatBufAndLexStrings() {
+    if (startIndex < currentIndex) {
+        int lexemeLen = currentIndex - startIndex;
+        if (lexemeBuf == NULL) {
+            lexemeBuf = (char*) malloc((lexemeLen + 1) * sizeof(char));
+            for(int i = startIndex; i < currentIndex; i++) {
+                lexemeBuf[i - startIndex] = readBuf[i];
+            }
+            lexemeBuf[lexemeLen] = '\0';
+        } else {
+            int lexBufLen = strlen(lexemeBuf);
+            lexemeBuf = (char*) realloc (lexemeBuf, (lexBufLen + lexemeLen + 1) * sizeof(char));
+            for(int i = startIndex; i < currentIndex; i++) {
+                lexemeBuf[i - startIndex + lexBufLen] = readBuf[i];
+            }
+            lexemeBuf[lexemeLen + lexBufLen] = '\0';
+        }
+    }
+}
+
+char* getLexemeFromBuf() {
+    concatBufAndLexStrings();
+    startIndex = currentIndex;
+    char* lexeme = lexemeBuf;
+    lexemeBuf = NULL;
+    return lexeme;
 }
 
 char nextChar() {
     if (readBuf[currentIndex] == '\0') {
-        if (exceeded == 1) {
-            if (!feof(fp)) {
-                fgets(readBuf, READ_BUF_SIZE, fp);
-                startIndex = currentIndex = exceeded = 0;
-                return readBuf[currentIndex++];
-            } else {
-                return EOF;
-            }
+        concatBufAndLexStrings();
+        startIndex = currentIndex = 0;
+        if (!feof(fp)) {
+            fgets(readBuf, READ_BUF_SIZE, fp);
+            return readBuf[currentIndex++];
         } else {
-            exceeded = 1;
-            return '\0';
+            readBuf[0] = EOF;
+            return readBuf[currentIndex++];
         }
     } else {
+        isLexemeBufSet = 0;
         return readBuf[currentIndex++];
     }
 }
@@ -50,21 +79,7 @@ void skipChar() {
 void retractChar() {
     if (exceeded == 1) {
         exceeded = 0;
-    } else if (currentIndex >= startIndex) {
+    } else if (currentIndex > startIndex) {
         currentIndex--;
     }
-}
-
-char* getLexemeFromBuf() {
-    if (startIndex > currentIndex) {
-        return "";
-    }
-    int lexemeLen = currentIndex - startIndex;
-    char* lexeme = (char*) malloc ((lexemeLen + 1) * sizeof(char));
-    for(int i = startIndex; i < currentIndex; i++) {
-        lexeme[i - startIndex] = readBuf[i];
-    }
-    lexeme[lexemeLen] = '\0';
-    startIndex = currentIndex;
-    return lexeme;
 }
