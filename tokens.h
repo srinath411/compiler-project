@@ -3,7 +3,7 @@
 
 enum Token {ASSIGN_OP, COMMENT, FIELD_ID, ID, NUM, R_NUM, FUN_ID, RECORD_ID, WITH, PARAMETERS, END, WHILE, INT, REAL, TYPE, MAIN, GLOBAL,
 PARAMETER, LIST, SQL, SQR, INPUT, OUTPUT, COMMA, SEM, COLON, DOT, END_WHILE, OP, CL, IF, THEN, END_IF, READ, WRITE, RETURN, PLUS, MINUS,
-MUL, DIV, CALL, RECORD, END_RECORD, ELSE, AND, OR, NOT, LT, GT, LE, GE, EQ, NE};
+MUL, DIV, CALL, RECORD, END_RECORD, ELSE, AND, OR, NOT, LT, GT, LE, GE, EQ, NE, DOLLAR};
 
 typedef enum Token Token;
 
@@ -29,5 +29,6 @@ tokenEle* getTokenFromStream();
 void freeTokenEle(tokenEle* ele);
 void freeTokenStream();
 Lexeme* getEmptyLexeme();
+void addDollarAtEnd();
 
 #endif

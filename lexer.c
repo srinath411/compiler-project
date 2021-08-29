@@ -446,6 +446,7 @@ void tokenizeCode(char* filename) {
     }
     initKeywordTable();
     findAndAddTokens();
+    addDollarAtEnd();
     freeKeywordTable();
     closeScanner();
 }

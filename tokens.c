@@ -64,3 +64,12 @@ Lexeme* getEmptyLexeme() {
     Lexeme* lexeme = (Lexeme*) malloc (sizeof(Lexeme));
     return lexeme;
 }
+
+void addDollarAtEnd() {
+    Lexeme* lexeme = getEmptyLexeme();
+    lexeme ->str = "$";
+    Token token = DOLLAR;
+    int lineNo = (last == NULL) ? 0 : last ->lineNo;
+    tokenEle* ele = createNewTokenEle(lexeme, token, lineNo);
+    appendTokenEle(ele);
+}
