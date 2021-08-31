@@ -1,11 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include "tokens.h"
-#include "grammar.h"
+#include "../common/tokens.h"
+#include "../common/grammar.h"
 #include "parse_tree.h"
 #include "parse_table.h"
-#include "stack.h"
+#include "../utils/stack.h"
 
 void addGrammarEleToStack(Stack* stack, TreeNode* head, GrammarEle* ele) {
     if (ele == NULL) {
@@ -37,7 +37,7 @@ void parseTokens() {
                     node ->info ->leaf ->lexeme = getCopyOfLexeme(streamEle ->lexeme, token);
                 } else {
                     printf("Error!!! Line no: %d, Expected: %s Got: %s\n", 
-                        streamEle ->lineNo, getTokenStr(streamEle ->token), getTokenStr(token));
+                        streamEle ->lineNo, getTokenStr(token), getTokenStr(streamEle ->token));
                     return;
                 }
                 free(streamEle);

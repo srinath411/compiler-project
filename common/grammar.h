@@ -17,7 +17,7 @@ ioStmt, returnStmt, mainFunction};
 
 typedef enum NonTerminal NonTerminal;
 
-void initGrammarRules();
+void initGrammarRules(char* filename);
 int getFirstOccurence(NonTerminal nonTerminal);
 int getLastOccurence(NonTerminal nonTerminal);
 GrammarEle* getGrammarRule(int ruleNo);

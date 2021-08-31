@@ -2,10 +2,9 @@
 #include<stdlib.h>
 #include<string.h>
 #include "grammar.h"
-#include "tokens.h"
-#include "hash_table.h"
-#include "scanner.h"
-#define GRAMMAR_FILE "Grammar.txt"
+#include "../common/tokens.h"
+#include "../utils/hash_table.h"
+#include "../utils/scanner.h"
 #define TOKEN_BUCKETS 8
 #define NON_TERMINAL_BUCKETS 8
 
@@ -56,10 +55,10 @@ GrammarEle* getGrammarRule(int ruleNo) {
     return grammar[ruleNo];
 }
 
-void scanAndPopulateGrammar() {
-    int err = initScanner(GRAMMAR_FILE);
+void scanAndPopulateGrammar(char* filename) {
+    int err = initScanner(filename);
     if (err) {
-        printf("Error opening file: %s\n", GRAMMAR_FILE);
+        printf("Error opening file: %s\n", filename);
         return;
     }
     int ruleNo = 0, scanState = 0;
@@ -137,7 +136,7 @@ void scanAndPopulateGrammar() {
     closeScanner();
 }
 
-void initGrammarRules() {
+void initGrammarRules(char* filename) {
     for(int i = 0; i < NUM_NON_TERMINALS; i++) {
         firstOccInRules[i] = -1;
         lastOccInRules[i] = -1;
@@ -146,7 +145,7 @@ void initGrammarRules() {
         grammar[i] = NULL;
     }
     storeTokenAndNonTerminalStrs();
-    scanAndPopulateGrammar();
+    scanAndPopulateGrammar(filename);
 }
 
 void freeTokenAndNonTerminalTables() {

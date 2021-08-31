@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include "tokens.h"
-#include "grammar.h"
+#include "../common/tokens.h"
+#include "../common/grammar.h"
 #define INT_SIZE ((int)sizeof(int) * 8)
 #define SET_SIZE (NUM_TOKENS / INT_SIZE) + 1
 #define DONE_SIZE (NUM_NON_TERMINALS / INT_SIZE) + 1

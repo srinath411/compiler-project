@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "parse_tree.h"
+#include "../parser/parse_tree.h"
 
 typedef struct Stack {
     int stackSize;

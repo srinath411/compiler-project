@@ -1,3 +1,3 @@
-runCode: driver.c lexer.c parser.c keywords.c tokens.c scanner.c hash_table.c grammar.c parse_table.c parse_tree.c stack.c
-	gcc -o output.exe driver.c lexer.c parser.c keywords.c tokens.c scanner.c hash_table.c grammar.c parse_table.c parse_tree.c stack.c
+runCode: driver.c lexer/lexer.c parser/parser.c lexer/keywords.c common/tokens.c utils/scanner.c utils/hash_table.c common/grammar.c parser/parse_table.c parser/parse_tree.c utils/stack.c
+	gcc -o output.exe driver.c lexer/lexer.c parser/parser.c lexer/keywords.c common/tokens.c utils/scanner.c utils/hash_table.c common/grammar.c parser/parse_table.c parser/parse_tree.c utils/stack.c
 	./output.exe
