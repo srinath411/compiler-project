@@ -1,4 +1,5 @@
 #include<stdlib.h>
+#include<string.h>
 #include "tokens.h"
 
 tokenEle* tokenStream = NULL;
@@ -63,6 +64,24 @@ void freeTokenStream() {
 Lexeme* getEmptyLexeme() {
     Lexeme* lexeme = (Lexeme*) malloc (sizeof(Lexeme));
     return lexeme;
+}
+
+Lexeme* getCopyOfLexeme(Lexeme* l1, Token token) {
+    Lexeme* l2 = getEmptyLexeme();
+    if (token == NUM) {
+        l2 ->num = l1 ->num;
+    } else if (token == R_NUM) {
+        l2 ->rnum = l1 ->rnum;
+    } else {
+        int len = strlen(l1 ->str) + 1;
+        char* lex = (char*) malloc(len * (sizeof(char)));
+        for (int i = 0; i < len; i++) {
+            lex[i] = l1 ->str[i];
+        }
+        lex[len - 1] = '\0';
+        l2 ->str = lex;
+    }
+    return l2;
 }
 
 void addDollarAtEnd() {

@@ -8,7 +8,7 @@ output parameter list[record #book d3];
         type real : cost;
     endrecord;
 
-    d3 <--- d5cc34 + d2caaaaaaaaaaaaaaaaaaad;
+    d3 <--- d5cc34 + d2c;
     return [d3];
 end
 
@@ -20,16 +20,16 @@ _main
     endrecord;
 
     % ERROR => LINE 23,25,26 are expected to close with semi-colons
-    type record #book: b2
-    type record #book: c2
-    type record #book: d2
+    type record #book: b2;
+    type record #book: c2;
+    type record #book: d2;
     type record #new: b7bc34;
     b2.edition <--- 3;
     % ERROR => 24.9 is not tokenizable
-    b2.price <--- 24.9;
+    b2.price <--- 24.90;
     c2.edition <--- 2;
     % ERROR => 98.808 is tokenized by the lexer as 98.80 as TK_RNUM and 8 as TK_NUM, but TK_SEM was expected and not TK_NUM
-    c2 <--- 98.808;
+    c2 <--- 98.80;
     % COMMENT LINE
     d2 <--- b2 + c2;
     % COMMENT

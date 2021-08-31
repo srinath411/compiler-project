@@ -1,0 +1,89 @@
+program --> otherFunctions mainFunction DOLLAR
+otherFunctions --> function otherFunctions
+otherFunctions --> EPS
+function --> FUN_ID inputParams outputParams SEM stmts END
+inputParams --> INPUT paramList
+outputParams --> OUTPUT paramList
+outputParams --> EPS
+paramList --> PARAMETER LIST SQL params SQR
+params --> param otherParams
+param --> type ID
+type --> primitiveType
+type --> userDefType
+primitiveType --> INT
+primitiveType --> REAL
+userDefType --> RECORD RECORD_ID
+otherParams --> COMMA param otherParams
+otherParams --> EPS
+stmts --> recordDefinitions declStmts otherStmts returnStmt
+recordDefinitions --> recordDefinition recordDefinitions
+recordDefinitions --> EPS
+recordDefinition --> RECORD RECORD_ID fieldStmts END_RECORD SEM
+fieldStmts --> fieldStmt fieldStmt otherFieldStmts
+fieldStmt --> TYPE primitiveType COLON FIELD_ID SEM
+otherFieldStmts --> fieldStmt otherFieldStmts
+otherFieldStmts --> EPS
+declStmts --> declStmt declStmts
+declStmts --> EPS
+declStmt --> TYPE type COLON ID global SEM
+global --> COLON GLOBAL
+global --> EPS
+otherStmts --> stmt otherStmts
+otherStmts --> EPS
+stmt --> assignStmt
+stmt --> iterStmt
+stmt --> condStmt
+stmt --> callStmt
+stmt --> ioStmt
+assignStmt --> generalId ASSIGN_OP exp SEM
+generalId --> ID fieldRef
+fieldRef --> DOT FIELD_ID
+fieldRef --> EPS
+exp --> mul restExp
+restExp --> PLUS mul restExp
+restExp --> MINUS mul restExp
+restExp --> EPS
+mul --> var restMul
+restMul --> MUL var restMul
+restMul --> DIV var restMul
+restMul --> EPS
+var --> allId
+var --> OP exp CL
+allId --> generalId
+allId --> NUM
+allId --> R_NUM
+iterStmt --> WHILE OP boolExp CL otherStmts END_WHILE
+boolExp --> andExp restBool
+restBool --> OR andExp restBool
+restBool --> EPS
+andExp --> boolVar restAnd
+restAnd --> AND boolVar restAnd
+restAnd --> EPS
+boolVar --> OP boolExp CL
+boolVar --> NOT OP boolExp CL
+boolVar --> boolComp
+boolComp --> allId boolOp allId
+boolOp --> LT
+boolOp --> LE
+boolOp --> EQ
+boolOp --> NE
+boolOp --> GE
+boolOp --> GT
+condStmt --> IF OP boolExp CL THEN otherStmts optionalElse END_IF
+optionalElse --> ELSE otherStmts
+optionalElse --> EPS
+callStmt --> optionalReturn CALL FUN_ID WITH PARAMETERS SQL allIds SQR SEM
+optionalReturn --> SQL ids SQR ASSIGN_OP
+optionalReturn --> EPS
+ids --> generalId otherIds
+otherIds --> COMMA generalId otherIds
+otherIds --> EPS
+allIdList --> SQL allIds SQR
+allIdList --> EPS
+allIds --> allId otherAlls
+otherAlls --> COMMA allId otherAlls
+otherAlls --> EPS
+ioStmt --> READ OP generalId CL SEM
+ioStmt --> WRITE OP allId CL SEM
+returnStmt --> RETURN allIdList SEM
+mainFunction --> MAIN stmts END

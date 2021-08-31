@@ -20,7 +20,7 @@ void initKeywordTable() {
 
 Token getKeywordIfPresent(char* lexeme) {
     int index = findEleInTable(hashTable, NUM_BUCKETS, lexeme);
-    return keywordTokens[index];
+    return (index == -1) ? -1 : keywordTokens[index];
 }
 
 void freeKeywordTable() {

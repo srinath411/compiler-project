@@ -48,6 +48,7 @@ void freeHashTable(hashEle** buckets, int numBuckets) {
             free(temp);
             temp = NULL;
         }
+        buckets[i] = NULL;
     }
 }
 
