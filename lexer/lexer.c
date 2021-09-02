@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "keywords.h"
-#include "../lexer/tokenStream.h"
+#include "../lexer/token_stream.h"
 #include "../utils/scanner.h"
 
 int isInRange(char c, char low, char high) {

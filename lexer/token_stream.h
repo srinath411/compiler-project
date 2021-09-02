@@ -1,5 +1,5 @@
-#ifndef TOKENS_H
-#define TOKENS_H
+#ifndef TOKEN_STREAM_H
+#define TOKEN_STREAM_H
 #include "../common/symbols.h"
 
 typedef union lexeme

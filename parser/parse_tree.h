@@ -1,7 +1,7 @@
 #ifndef PARSE_TREE_H
 #define PARSE_TREE_H
 
-#include "../lexer/tokenStream.h"
+#include "../lexer/token_stream.h"
 #include "grammar.h"
 
 enum NodeType {parentNodeType, leafNodeType};

@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include "../lexer/tokenStream.h"
+#include "../lexer/token_stream.h"
 #include "grammar.h"
 #include "parse_tree.h"
 #include "parse_table.h"
