@@ -2,25 +2,21 @@
 #include<stdlib.h>
 #include "../common/symbols.h"
 #include "grammar.h"
-#define INT_SIZE ((int)sizeof(int) * 8)
-#define SET_SIZE (NUM_TOKENS / INT_SIZE) + 1
-#define DONE_SIZE (NUM_NON_TERMINALS / INT_SIZE) + 1
+#include "../utils/bit_array.h"
 
 int** firstSet = NULL;
 int** followSet = NULL;
 
 int parseTable[NUM_NON_TERMINALS][NUM_TOKENS];
 
-int tempFollow[SET_SIZE];
-int doneFirstCalc[DONE_SIZE];
+int* tempFollow;
+int* doneFirstCalc;
+int* before;
 
 int** initSet() {
     int** set = (int**) malloc (NUM_NON_TERMINALS * sizeof(int*));
     for(int i = 0; i < NUM_NON_TERMINALS; i++) {
-        set[i] = (int*) malloc (SET_SIZE * sizeof(int));
-        for(int j = 0; j < SET_SIZE; j++) {
-            set[i][j] = 0;
-        }
+        set[i] = initBitArr(NUM_TOKENS);
     }
     return set;
 }
@@ -33,53 +29,12 @@ void freeSet(int** set) {
     set = NULL;
 }
 
-void setBit(int* set, int pos) {
-    int bitPos = pos % INT_SIZE;
-    int arrPos = pos / INT_SIZE;
-    set[arrPos] |= 1 << bitPos;
-}
-
-void clearBit(int* set, int pos) {
-    int bitPos = pos % INT_SIZE;
-    int arrPos = pos / INT_SIZE;
-    set[arrPos] &= ~(1 << bitPos);   
-}
-
-int isBitSet(int* set, int pos) {
-    int bitPos = pos % INT_SIZE;
-    int arrPos = pos / INT_SIZE;
-    return set[arrPos] & (1 << bitPos);
-}
-
-void computeSetUnion(int* set1, int* set2) {
-    for(int i = 0; i < SET_SIZE; i++) {
-        set1[i] |= set2[i];
-    }
-}
-
-void markFirstCalcDone(NonTerminal nonTerminal) {
-    setBit(doneFirstCalc, nonTerminal);
-}
-
-int firstCalcDone(NonTerminal nonTerminal) {
-    return isBitSet(doneFirstCalc, nonTerminal);
-}
-
-void addTokenToSet(int* set, Token token) {
-    setBit(set, token);
-}
-
-void clearTokenFromSet(int* set, Token token) {
-    clearBit(set, token);
-}
-
-int setContains(int* set, Token token) {
-    return isBitSet(set, token);
-}
-
 void initFirstAndFollowSets() {
     firstSet = initSet();
     followSet = initSet();
+    tempFollow = initBitArr(NUM_TOKENS);
+    before = initBitArr(NUM_TOKENS);
+    doneFirstCalc = initBitArr(NUM_NON_TERMINALS);
 }
 
 void initParseTable() {
@@ -91,7 +46,7 @@ void initParseTable() {
 }
 
 void calcFirstSet(NonTerminal nonTerminal) {
-    if (firstCalcDone(nonTerminal)) {
+    if (isBitSet(doneFirstCalc, nonTerminal)) {
         return;
     }
     int rulePos = getFirstOccurence(nonTerminal);
@@ -110,28 +65,28 @@ void calcFirstSet(NonTerminal nonTerminal) {
         ele = ele ->next;
         while(ele != NULL) {
             if (ele ->isTerminal) {
-                addTokenToSet(firstSet[nonTerminal], ele ->symbol ->token);
+                setBit(firstSet[nonTerminal], ele ->symbol ->token);
                 if (ele ->symbol ->token == EPS) {
                     isEpsilonPresent = 1;
                 }
                 break;
             } else {
                 calcFirstSet(ele ->symbol ->nonTerminal);
-                computeSetUnion(firstSet[nonTerminal], firstSet[ele ->symbol ->nonTerminal]);
-                if (!setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
+                computeBitArrUnion(firstSet[nonTerminal], firstSet[ele ->symbol ->nonTerminal], NUM_TOKENS);
+                if (!isBitSet(firstSet[ele ->symbol ->nonTerminal], EPS)) {
                     break;
                 } else if (ele ->next == NULL) {
                     isEpsilonPresent = 1;
                 }
             }
-            clearTokenFromSet(firstSet[nonTerminal], EPS);
+            clearBit(firstSet[nonTerminal], EPS);
             ele = ele ->next;
         }
     }
     if (isEpsilonPresent) {
-        addTokenToSet(firstSet[nonTerminal], EPS);
+        setBit(firstSet[nonTerminal], EPS);
     }
-    markFirstCalcDone(nonTerminal);
+    setBit(doneFirstCalc, nonTerminal);
 }
 
 void computeFirstSet() {
@@ -147,52 +102,40 @@ int computeFollowInRule(NonTerminal head, GrammarEle* ele) {
     }
     setChanged = computeFollowInRule(head, ele ->next);
     if (ele ->isTerminal) {
-        for (int i = 0; i < SET_SIZE; i++) {
-            tempFollow[i] = 0;
-        }
-        addTokenToSet(tempFollow, ele ->symbol ->token);
+        clearAllBits(tempFollow, NUM_TOKENS);
+        setBit(tempFollow, ele ->symbol ->token);
         return setChanged;
     } else {
-        int before[SET_SIZE];
-        for (int i = 0; i < SET_SIZE; i++) {
-            before[i] = followSet[ele ->symbol ->nonTerminal][i];
-        }
+        copyBitArr(before, followSet[ele ->symbol ->nonTerminal], NUM_TOKENS);
         if (ele ->next == NULL) {
-            computeSetUnion(followSet[ele ->symbol ->nonTerminal], followSet[head]);
-            if (setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
-                for(int i = 0; i < SET_SIZE; i++) {
-                    tempFollow[i] = followSet[head][i];
-                }
+            computeBitArrUnion(followSet[ele ->symbol ->nonTerminal], followSet[head], NUM_TOKENS);
+            if (isBitSet(firstSet[ele ->symbol ->nonTerminal], EPS)) {
+                copyBitArr(tempFollow, followSet[head], NUM_TOKENS);
             }
         } else if (ele ->next ->isTerminal) {
-            addTokenToSet(followSet[ele ->symbol ->nonTerminal], ele ->next ->symbol ->token);
+            setBit(followSet[ele ->symbol ->nonTerminal], ele ->next ->symbol ->token);
         } else {
-            computeSetUnion(followSet[ele ->symbol ->nonTerminal], firstSet[ele ->next ->symbol ->nonTerminal]);
-            if (setContains(followSet[ele ->symbol ->nonTerminal], EPS)) {
-                computeSetUnion(followSet[ele ->symbol ->nonTerminal], tempFollow);
-                clearTokenFromSet(followSet[ele ->symbol ->nonTerminal], EPS);
+            computeBitArrUnion(followSet[ele ->symbol ->nonTerminal], firstSet[ele ->next ->symbol ->nonTerminal], NUM_TOKENS);
+            if (isBitSet(followSet[ele ->symbol ->nonTerminal], EPS)) {
+                computeBitArrUnion(followSet[ele ->symbol ->nonTerminal], tempFollow, NUM_TOKENS);
+                clearBit(followSet[ele ->symbol ->nonTerminal], EPS);
             }
         }
-        for(int i = 0; i < SET_SIZE; i++) {
-            if (before[i] != followSet[ele ->symbol ->nonTerminal][i]) {
-                setChanged = 1;
-                break;
-            }
+        if (!bitArrsEqual(before, followSet[ele ->symbol ->nonTerminal], NUM_TOKENS)) {
+            setChanged = 1;
         }
-        if (!setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
-            for(int i = 0; i < SET_SIZE; i++) {
-                tempFollow[i] = firstSet[ele ->symbol ->nonTerminal][i];
-            }
-            clearTokenFromSet(tempFollow, EPS);
+        if (!isBitSet(firstSet[ele ->symbol ->nonTerminal], EPS)) {
+            copyBitArr(tempFollow, firstSet[ele ->symbol ->nonTerminal], NUM_TOKENS);
+            clearBit(tempFollow, EPS);
         } else {
-            computeSetUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal]);
+            computeBitArrUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal], NUM_TOKENS);
         }
         return setChanged;
     }
 }
 
 void computeFollowSet() {
-    addTokenToSet(followSet[program], DOLLAR);
+    setBit(followSet[program], DOLLAR);
     int setChanged = 1;
     while(setChanged) {
         setChanged = 0;
@@ -204,9 +147,7 @@ void computeFollowSet() {
             }
             NonTerminal head = ele ->symbol ->nonTerminal;
             ele = ele ->next;
-            for (int i = 0; i < SET_SIZE; i++) {
-                tempFollow[i] = 0;
-            }
+            clearAllBits(tempFollow, NUM_TOKENS);
             setChanged = setChanged || computeFollowInRule(head, ele);
         }
     }
@@ -214,7 +155,7 @@ void computeFollowSet() {
 
 void addSetToTable(NonTerminal nonTerminal, int* set, int ruleNo) {
     for(int i = 0; i < NUM_TOKENS; i++) {
-        if (setContains(set, i)) {
+        if (isBitSet(set, i)) {
             if (parseTable[nonTerminal][i] != -1) {
                 printf("ERROR!!!\n");
                 return;
@@ -226,19 +167,17 @@ void addSetToTable(NonTerminal nonTerminal, int* set, int ruleNo) {
 }
 
 void addFirstSetToTable(NonTerminal nonTerminal, GrammarEle* ele, int ruleNo) {
-    for(int i = 0; i < SET_SIZE; i++) {
-        tempFollow[i] = 0;
-    }
+    clearAllBits(tempFollow, NUM_TOKENS);
     while(ele != NULL) {
         if (ele ->isTerminal) {
-            addTokenToSet(tempFollow, ele ->symbol ->token);
+            setBit(tempFollow, ele ->symbol ->token);
             break;
         } else {
-            computeSetUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal]);
-            if (!setContains(tempFollow, EPS)) {
+            computeBitArrUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal], NUM_TOKENS);
+            if (!isBitSet(tempFollow, EPS)) {
                 break;
             } else {
-                clearTokenFromSet(tempFollow, EPS);
+                clearBit(tempFollow, EPS);
             }
         }
         ele = ele ->next;
@@ -266,6 +205,8 @@ int getRuleNoFromTable(NonTerminal nonTerminal, Token token) {
 void freeFirstAndFollowSets() {
     freeSet(firstSet);
     freeSet(followSet);
+    free(tempFollow);
+    free(doneFirstCalc);
 }
 
 void computeParseTable() {
@@ -281,13 +222,13 @@ void printFirstSet() {
     // for(int i = 0; i < NUM_NON_TERMINALS; i++) {
     //     printf("%s: ", getNonTerminalStr(i));
     //     for(int j = 0; j < NUM_TOKENS; j++) {
-    //         if (setContains(firstSet[i], j)) {
+    //         if (isBitSet(firstSet[i], j)) {
     //             printf("%s ", getTokenStr(j));
     //         }
     //     }
     //     printf("\t|\t");
     //     for(int j = 0; j < NUM_TOKENS; j++) {
-    //         if(setContains(followSet[i], j)) {
+    //         if(isBitSet(followSet[i], j)) {
     //             printf("%s ", getTokenStr(j));
     //         }
     //     }
