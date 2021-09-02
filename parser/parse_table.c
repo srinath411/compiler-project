@@ -6,8 +6,7 @@
 
 int** firstSet = NULL;
 int** followSet = NULL;
-
-int parseTable[NUM_NON_TERMINALS][NUM_TOKENS];
+int** parseTable = NULL;
 
 int* tempFollow;
 int* doneFirstCalc;
@@ -26,6 +25,7 @@ void freeSet(int** set) {
         free(set[i]);
         set[i] = NULL;
     }
+    free(set);
     set = NULL;
 }
 
@@ -38,7 +38,9 @@ void initFirstAndFollowSets() {
 }
 
 void initParseTable() {
+    parseTable = (int**) malloc(NUM_NON_TERMINALS * sizeof(int*));
     for(int i = 0; i < NUM_NON_TERMINALS; i++) {
+        parseTable[i] = (int*) malloc(NUM_TOKENS * sizeof(int));
         for(int j = 0; j < NUM_TOKENS; j++) {
             parseTable[i][j] = -1;
         }
@@ -207,6 +209,15 @@ void freeFirstAndFollowSets() {
     freeSet(followSet);
     free(tempFollow);
     free(doneFirstCalc);
+}
+
+void freeParseTable() {
+    for(int i = 0; i < NUM_NON_TERMINALS; i++) {
+        free(parseTable[i]);
+        parseTable[i] = NULL;
+    }
+    free(parseTable);
+    parseTable = NULL;
 }
 
 void computeParseTable() {

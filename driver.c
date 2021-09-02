@@ -16,6 +16,7 @@ int main() {
     // printFirstSet();
     parseTokens();
     freeFirstAndFollowSets();
+    freeParseTable();
     freeTokenAndNonTerminalTables();
     freeGrammarRules();
     return 0;

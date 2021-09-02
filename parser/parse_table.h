@@ -7,5 +7,6 @@ void computeParseTable();
 int getRuleNoFromTable(NonTerminal nonTerminal, Token token);
 void printFirstSet();
 void freeFirstAndFollowSets();
+void freeParseTable();
 
 #endif
