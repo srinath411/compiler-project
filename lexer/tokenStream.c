@@ -1,6 +1,6 @@
 #include<stdlib.h>
 #include<string.h>
-#include "tokens.h"
+#include "tokenStream.h"
 
 tokenEle* tokenStream = NULL;
 tokenEle* last = NULL;

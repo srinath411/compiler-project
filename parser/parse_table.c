@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include "../common/tokens.h"
-#include "../common/grammar.h"
+#include "../common/symbols.h"
+#include "grammar.h"
 #define INT_SIZE ((int)sizeof(int) * 8)
 #define SET_SIZE (NUM_TOKENS / INT_SIZE) + 1
 #define DONE_SIZE (NUM_NON_TERMINALS / INT_SIZE) + 1
@@ -110,15 +110,15 @@ void calcFirstSet(NonTerminal nonTerminal) {
         ele = ele ->next;
         while(ele != NULL) {
             if (ele ->isTerminal) {
-                addTokenToSet(firstSet[nonTerminal], ele ->symbol);
-                if (ele ->symbol == EPS) {
+                addTokenToSet(firstSet[nonTerminal], ele ->symbol ->token);
+                if (ele ->symbol ->token == EPS) {
                     isEpsilonPresent = 1;
                 }
                 break;
             } else {
-                calcFirstSet(ele ->symbol);
-                computeSetUnion(firstSet[nonTerminal], firstSet[ele ->symbol]);
-                if (!setContains(firstSet[ele ->symbol], EPS)) {
+                calcFirstSet(ele ->symbol ->nonTerminal);
+                computeSetUnion(firstSet[nonTerminal], firstSet[ele ->symbol ->nonTerminal]);
+                if (!setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
                     break;
                 } else if (ele ->next == NULL) {
                     isEpsilonPresent = 1;
@@ -150,42 +150,42 @@ int computeFollowInRule(NonTerminal head, GrammarEle* ele) {
         for (int i = 0; i < SET_SIZE; i++) {
             tempFollow[i] = 0;
         }
-        addTokenToSet(tempFollow, ele ->symbol);
+        addTokenToSet(tempFollow, ele ->symbol ->token);
         return setChanged;
     } else {
         int before[SET_SIZE];
         for (int i = 0; i < SET_SIZE; i++) {
-            before[i] = followSet[ele ->symbol][i];
+            before[i] = followSet[ele ->symbol ->nonTerminal][i];
         }
         if (ele ->next == NULL) {
-            computeSetUnion(followSet[ele ->symbol], followSet[head]);
-            if (setContains(firstSet[ele ->symbol], EPS)) {
+            computeSetUnion(followSet[ele ->symbol ->nonTerminal], followSet[head]);
+            if (setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
                 for(int i = 0; i < SET_SIZE; i++) {
                     tempFollow[i] = followSet[head][i];
                 }
             }
         } else if (ele ->next ->isTerminal) {
-            addTokenToSet(followSet[ele ->symbol], ele ->next ->symbol);
+            addTokenToSet(followSet[ele ->symbol ->nonTerminal], ele ->next ->symbol ->token);
         } else {
-            computeSetUnion(followSet[ele ->symbol], firstSet[ele ->next ->symbol]);
-            if (setContains(followSet[ele ->symbol], EPS)) {
-                computeSetUnion(followSet[ele ->symbol], tempFollow);
-                clearTokenFromSet(followSet[ele ->symbol], EPS);
+            computeSetUnion(followSet[ele ->symbol ->nonTerminal], firstSet[ele ->next ->symbol ->nonTerminal]);
+            if (setContains(followSet[ele ->symbol ->nonTerminal], EPS)) {
+                computeSetUnion(followSet[ele ->symbol ->nonTerminal], tempFollow);
+                clearTokenFromSet(followSet[ele ->symbol ->nonTerminal], EPS);
             }
         }
         for(int i = 0; i < SET_SIZE; i++) {
-            if (before[i] != followSet[ele ->symbol][i]) {
+            if (before[i] != followSet[ele ->symbol ->nonTerminal][i]) {
                 setChanged = 1;
                 break;
             }
         }
-        if (!setContains(firstSet[ele ->symbol], EPS)) {
+        if (!setContains(firstSet[ele ->symbol ->nonTerminal], EPS)) {
             for(int i = 0; i < SET_SIZE; i++) {
-                tempFollow[i] = firstSet[ele ->symbol][i];
+                tempFollow[i] = firstSet[ele ->symbol ->nonTerminal][i];
             }
             clearTokenFromSet(tempFollow, EPS);
         } else {
-            computeSetUnion(tempFollow, firstSet[ele ->symbol]);
+            computeSetUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal]);
         }
         return setChanged;
     }
@@ -202,7 +202,7 @@ void computeFollowSet() {
                 printf("Error\n");
                 return;
             }
-            NonTerminal head = ele ->symbol;
+            NonTerminal head = ele ->symbol ->nonTerminal;
             ele = ele ->next;
             for (int i = 0; i < SET_SIZE; i++) {
                 tempFollow[i] = 0;
@@ -231,10 +231,10 @@ void addFirstSetToTable(NonTerminal nonTerminal, GrammarEle* ele, int ruleNo) {
     }
     while(ele != NULL) {
         if (ele ->isTerminal) {
-            addTokenToSet(tempFollow, ele ->symbol);
+            addTokenToSet(tempFollow, ele ->symbol ->token);
             break;
         } else {
-            computeSetUnion(tempFollow, firstSet[ele ->symbol]);
+            computeSetUnion(tempFollow, firstSet[ele ->symbol ->nonTerminal]);
             if (!setContains(tempFollow, EPS)) {
                 break;
             } else {
@@ -249,9 +249,9 @@ void addFirstSetToTable(NonTerminal nonTerminal, GrammarEle* ele, int ruleNo) {
 void populateParseTable() {
     for(int i = 0; i < NUM_RULES; i++) {
         GrammarEle* ele = getGrammarRule(i);
-        NonTerminal head = ele ->symbol;
+        NonTerminal head = ele ->symbol ->nonTerminal;
         ele = ele ->next;
-        if(ele ->isTerminal && ele ->symbol == EPS) {
+        if(ele ->isTerminal && ele ->symbol ->token == EPS) {
             addSetToTable(head, followSet[head], i);
         } else {
             addFirstSetToTable(head, ele, i);

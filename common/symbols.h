@@ -1,13 +1,11 @@
-#ifndef GRAMMAR_H
-#define GRAMMAR_H
+#ifndef SYMBOLS_H
+#define SYMBOLS_H
+#define NUM_TOKENS 55
 #define NUM_NON_TERMINALS 52
-#define NUM_RULES 89
 
-typedef struct GrammarEle {
-    int symbol;
-    int isTerminal;
-    struct GrammarEle* next;
-} GrammarEle;
+enum Token {ASSIGN_OP, COMMENT, FIELD_ID, ID, NUM, R_NUM, FUN_ID, RECORD_ID, WITH, PARAMETERS, END, WHILE, INT, REAL, TYPE, MAIN, GLOBAL,
+PARAMETER, LIST, SQL, SQR, INPUT, OUTPUT, COMMA, SEM, COLON, DOT, END_WHILE, OP, CL, IF, THEN, END_IF, READ, WRITE, RETURN, PLUS, MINUS,
+MUL, DIV, CALL, RECORD, END_RECORD, ELSE, AND, OR, NOT, LT, GT, LE, GE, EQ, NE, DOLLAR, EPS};
 
 enum NonTerminal {program, otherFunctions, function, inputParams, outputParams, paramList, params, param, type, primitiveType,
 userDefType, otherParams, stmts, recordDefinitions, recordDefinition, fieldStmts, fieldStmt, otherFieldStmts, declStmts, declStmt,
@@ -15,17 +13,20 @@ global, otherStmts, stmt, assignStmt, generalId, fieldRef, exp, restExp, mul, re
 andExp, restAnd, boolVar, boolComp, boolOp, condStmt, optionalElse, callStmt, optionalReturn, ids, otherIds, allIdList, allIds, otherAlls,
 ioStmt, returnStmt, mainFunction};
 
+typedef enum Token Token;
 typedef enum NonTerminal NonTerminal;
 
-void initGrammarRules(char* filename);
-int getFirstOccurence(NonTerminal nonTerminal);
-int getLastOccurence(NonTerminal nonTerminal);
-GrammarEle* getGrammarRule(int ruleNo);
+typedef union Symbol {
+    Token token;
+    NonTerminal nonTerminal;
+} Symbol;
+
+void storeAllSymbols();
+int findTokenFromStr(char* str);
+int findNonTerminalFromString(char* str);
+char* getTokenStr(Token token);
+char* getNonTerminalStr(NonTerminal nonTerminal);
 void freeTokenAndNonTerminalTables();
-void freeGrammarRules();
 void printTokenAndNonTerminalTables();
-void printGrammarRules();
-char* getNonTerminalStr(int i);
-char* getTokenStr(int i);
 
 #endif

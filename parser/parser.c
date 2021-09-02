@@ -1,8 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include "../common/tokens.h"
-#include "../common/grammar.h"
+#include "../lexer/tokenStream.h"
+#include "grammar.h"
 #include "parse_tree.h"
 #include "parse_table.h"
 #include "../utils/stack.h"
@@ -14,9 +14,9 @@ void addGrammarEleToStack(Stack* stack, TreeNode* head, GrammarEle* ele) {
     addGrammarEleToStack(stack, head, ele ->next);
     TreeNode* node = NULL;
     if (ele ->isTerminal) {
-        node = createTreeNode(ele ->symbol, leafNodeType);
+        node = createTreeNode(ele ->symbol ->token, leafNodeType);
     } else {
-        node = createTreeNode(ele ->symbol, parentNodeType);
+        node = createTreeNode(ele ->symbol ->nonTerminal, parentNodeType);
     }
     addChildToNode(head, node);
     push(stack, node);

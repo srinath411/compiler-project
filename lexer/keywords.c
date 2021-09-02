@@ -1,7 +1,5 @@
 #include <stdlib.h>
-#include<string.h>
-#include "../common/tokens.h"
-#include "keywords.h"
+#include "../common/symbols.h"
 #include "../utils/hash_table.h"
 #define NUM_KEYWORDS 24
 #define NUM_BUCKETS 5

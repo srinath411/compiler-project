@@ -1,6 +1,7 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
-#include "../common/tokens.h"
+
+#include "../common/symbols.h"
 
 void initKeywordTable();
 void printKeywordTable();

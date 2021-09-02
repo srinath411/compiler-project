@@ -2,36 +2,13 @@
 #include<stdlib.h>
 #include<string.h>
 #include "grammar.h"
-#include "../common/tokens.h"
 #include "../utils/hash_table.h"
 #include "../utils/scanner.h"
-#define TOKEN_BUCKETS 8
-#define NON_TERMINAL_BUCKETS 8
 
 GrammarEle* grammar[NUM_RULES];
 
-char* tokenStrs[] = {"ASSIGN_OP", "COMMENT", "FIELD_ID", "ID", "NUM", "R_NUM", "FUN_ID", "RECORD_ID", "WITH", "PARAMETERS", "END",
-"WHILE", "INT", "REAL", "TYPE", "MAIN", "GLOBAL", "PARAMETER", "LIST", "SQL", "SQR", "INPUT", "OUTPUT", "COMMA", "SEM", "COLON",
-"DOT", "END_WHILE", "OP", "CL", "IF", "THEN", "END_IF", "READ", "WRITE", "RETURN", "PLUS", "MINUS", "MUL", "DIV", "CALL", "RECORD",
-"END_RECORD", "ELSE", "AND", "OR", "NOT", "LT", "GT", "LE", "GE", "EQ", "NE", "DOLLAR", "EPS"};
-
-char* nonTerminalStrs[] = {"program", "otherFunctions", "function", "inputParams", "outputParams", "paramList", "params", "param",
-"type", "primitiveType", "userDefType", "otherParams", "stmts", "recordDefinitions", "recordDefinition", "fieldStmts", "fieldStmt",
-"otherFieldStmts", "declStmts", "declStmt", "global", "otherStmts", "stmt", "assignStmt", "generalId", "fieldRef", "exp", 
-"restExp", "mul", "restMul", "var", "allId", "iterStmt", "boolExp", "restBool", "andExp", "restAnd", "boolVar", "boolComp", "boolOp",
-"condStmt", "optionalElse", "callStmt", "optionalReturn", "ids", "otherIds", "allIdList", "allIds", "otherAlls", "ioStmt", "returnStmt",
-"mainFunction"};
-
-hashEle** tokenTable = NULL;
-hashEle** nonTerminalTable = NULL;
-
 int firstOccInRules[NUM_NON_TERMINALS];
 int lastOccInRules[NUM_NON_TERMINALS];
-
-void storeTokenAndNonTerminalStrs() {
-    tokenTable = initHashTable(tokenStrs, NUM_TOKENS, TOKEN_BUCKETS);
-    nonTerminalTable = initHashTable(nonTerminalStrs, NUM_NON_TERMINALS, NON_TERMINAL_BUCKETS);
-}
 
 int isInRanges(char c, char low, char high) {
     return (c >= low) && (c <= high);
@@ -93,15 +70,17 @@ void scanAndPopulateGrammar(char* filename) {
                     ele ->isTerminal = 0;
                     ele ->next = NULL;
                     char* str = getLexemeFromBuf();
-                    ele ->symbol = findEleInTable(nonTerminalTable, NON_TERMINAL_BUCKETS, str);
-                    if (ele ->symbol == -1) {
+                    NonTerminal nonTerminal = findNonTerminalFromString(str);
+                    if (nonTerminal == -1) {
                         printf("Error %s\n", str);
                         return;
                     }
+                    ele ->symbol = (Symbol*) malloc (sizeof(Symbol));
+                    ele ->symbol ->nonTerminal = nonTerminal;
                     if (grammar[ruleNo] == NULL) {
                         grammar[ruleNo] = ele;
-                        setFirstOccurence(ele ->symbol, ruleNo);
-                        lastOccInRules[ele ->symbol] = ruleNo;
+                        setFirstOccurence(nonTerminal, ruleNo);
+                        lastOccInRules[nonTerminal] = ruleNo;
                     } else {
                         last ->next = ele;
                     }
@@ -119,11 +98,13 @@ void scanAndPopulateGrammar(char* filename) {
                     ele ->isTerminal = 1;
                     ele ->next = NULL;
                     char* str = getLexemeFromBuf();
-                    ele ->symbol = findEleInTable(tokenTable, TOKEN_BUCKETS, str);
-                    if (ele ->symbol == -1) {
+                    Token token = findTokenFromStr(str);
+                    if (token == -1) {
                         printf("Error %s\n", str);
                         return;
                     }
+                    ele ->symbol = (Symbol*) malloc (sizeof(Symbol));
+                    ele ->symbol ->token = token;
                     last ->next = ele;
                     last = ele;
                     scanState = 0;
@@ -144,15 +125,8 @@ void initGrammarRules(char* filename) {
     for(int i = 0; i < NUM_RULES; i++) {
         grammar[i] = NULL;
     }
-    storeTokenAndNonTerminalStrs();
+    storeAllSymbols();
     scanAndPopulateGrammar(filename);
-}
-
-void freeTokenAndNonTerminalTables() {
-    freeHashTable(tokenTable, TOKEN_BUCKETS);
-    freeHashTable(nonTerminalTable, NON_TERMINAL_BUCKETS);
-    tokenTable = NULL;
-    nonTerminalTable = NULL;
 }
 
 void freeGrammarRules() {
@@ -161,18 +135,12 @@ void freeGrammarRules() {
         while(head != NULL) {
             GrammarEle* temp = head;
             head = head ->next;
+            free(temp ->symbol);
             free(temp);
             temp = NULL;
         }
         grammar[i] = NULL;
     }
-}
-
-//debug
-void printTokenAndNonTerminalTables() {
-    printHashTable(tokenTable, TOKEN_BUCKETS);
-    printf("\n");
-    printHashTable(nonTerminalTable, NON_TERMINAL_BUCKETS);
 }
 
 void printGrammarRules() {
@@ -181,20 +149,12 @@ void printGrammarRules() {
         printf("Rule %d: ", i);
         while(head != NULL) {
             if (head ->isTerminal) {
-                printf("%s ", tokenStrs[head ->symbol]);
+                printf("%s ", getTokenStr(head ->symbol ->token));
             } else {
-                printf("%s ", nonTerminalStrs[head ->symbol]);
+                printf("%s ", getNonTerminalStr(head ->symbol ->nonTerminal));
             }
             head = head ->next;
         }
         printf("\n");
     }
-}
-
-char* getNonTerminalStr(int i) {
-    return nonTerminalStrs[i];
-}
-
-char* getTokenStr(int i) {
-    return tokenStrs[i];
 }
