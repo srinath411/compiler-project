@@ -56,19 +56,17 @@ char* getLexemeFromBuf() {
 }
 
 char nextChar() {
-    if (readBuf[currentIndex] == '\0') {
+    while(readBuf[currentIndex] == '\0') {
         concatBufAndLexStrings();
         startIndex = currentIndex = 0;
+        readBuf[0] = '\0';
         if (!feof(fp)) {
             fgets(readBuf, READ_BUF_SIZE, fp);
-            return readBuf[currentIndex++];
         } else {
             readBuf[0] = EOF;
-            return readBuf[currentIndex++];
         }
-    } else {
-        return readBuf[currentIndex++];
     }
+    return readBuf[currentIndex++];
 }
 
 void skipChar() {
