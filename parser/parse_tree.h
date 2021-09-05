@@ -33,7 +33,7 @@ typedef struct TreeNode {
 
 TreeNode* createTreeNode(int symbol, NodeType nodeType);
 void addChildToNode(TreeNode* parentNode, TreeNode* childNode);
-void printParseTree(TreeNode* node);
-void freeParseTree(TreeNode* node);
+void printTree(TreeNode* node);
+void freeTree(TreeNode* node);
 
 #endif

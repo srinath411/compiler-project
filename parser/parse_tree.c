@@ -27,7 +27,7 @@ void addChildToNode(TreeNode* parentNode, TreeNode* childNode) {
     parentNode ->lchild = childNode;
 }
 
-void printParseTree(TreeNode* node) {
+void printTree(TreeNode* node) {
     if (node == NULL) {
         return;
     }
@@ -37,26 +37,30 @@ void printParseTree(TreeNode* node) {
     } else {
         Token token = node ->info ->leaf ->token;
         printf("%s ", getTokenStr(token));
-        if (token == NUM) {
-            printf("%d\n", node ->info ->leaf ->lexeme ->num);
-        } else if (token == R_NUM) {
-            printf("%f\n", node ->info ->leaf ->lexeme ->rnum);
-        } else if(token == EPS) {
+        if (token == EPS) {
             printf("epsilon\n");
+        } else if (node ->info ->leaf ->lexeme != NULL) {
+            if (token == NUM) {
+                printf("%d\n", node ->info ->leaf ->lexeme ->num);
+            } else if (token == R_NUM) {
+                printf("%f\n", node ->info ->leaf ->lexeme ->rnum);
+            } else {
+                printf("%s\n", node ->info ->leaf ->lexeme ->str);
+            }
         } else {
-            printf("%s\n", node ->info ->leaf ->lexeme ->str);
+            printf("null\n");
         }
     }
-    printParseTree(node ->lchild);
-    printParseTree(node ->rsib);
+    printTree(node ->lchild);
+    printTree(node ->rsib);
 }
 
-void freeParseTree(TreeNode* node) {
+void freeTree(TreeNode* node) {
     if (node == NULL) {
         return;
     }
-    freeParseTree(node ->lchild);
-    freeParseTree(node ->rsib);
+    freeTree(node ->lchild);
+    freeTree(node ->rsib);
     node ->lchild = node ->rsib = node ->parent = NULL;
     if (node ->nodeType == parentNodeType) {
         free(node ->info ->parent);

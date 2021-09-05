@@ -21,26 +21,26 @@ float stringToFloat(char* str) {
     return f;
 }
 
-void addStrLexToStream(char* lex, Token token, int lineNo) {
+void addStrLexToStream(char* lex, Token token, int lineNo, int hasError) {
     Lexeme* lexeme = getEmptyLexeme();
     lexeme ->str = lex;
-    tokenEle* ele = createNewTokenEle(lexeme, token, lineNo);
+    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
     appendTokenEle(ele);
 }
 
-void addNumToStream(char* lex, Token token, int lineNo) {
+void addNumToStream(char* lex, Token token, int lineNo, int hasError) {
     int num = stringToInteger(lex);
     Lexeme* lexeme = getEmptyLexeme();
     lexeme ->num = num;
-    tokenEle* ele = createNewTokenEle(lexeme, token, lineNo);
+    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
     appendTokenEle(ele);
 }
 
-void addRealNumToStream(char* lex, Token token, int lineNo) {
+void addRealNumToStream(char* lex, Token token, int lineNo, int hasError) {
     float rnum = stringToFloat(lex);
     Lexeme* lexeme = getEmptyLexeme();
     lexeme ->rnum = rnum;
-    tokenEle* ele = createNewTokenEle(lexeme, token, lineNo);
+    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
     appendTokenEle(ele);
 }
 
@@ -165,13 +165,13 @@ void findAndAddTokens() {
                 break;
             case 1:
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo);
+                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 2:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo);
+                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 3:
@@ -181,7 +181,7 @@ void findAndAddTokens() {
                 if (tempToken != -1) {
                     reqdToken = tempToken;
                 }
-                addStrLexToStream(lexeme, reqdToken, lineNo);
+                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 4:
@@ -190,6 +190,7 @@ void findAndAddTokens() {
                     dfaState = 5;
                 } else {
                     expectedSeq = "&&&";
+                    reqdToken = AND;
                     dfaState = 26;
                 }
                 break;
@@ -200,6 +201,7 @@ void findAndAddTokens() {
                     dfaState = 1;
                 } else {
                     expectedSeq = "&&&";
+                    reqdToken = AND;
                     dfaState = 26;
                 }
                 break;
@@ -207,7 +209,7 @@ void findAndAddTokens() {
                 c = nextChar();
                 if (c == '-') {
                     dfaState = 7;
-                }else if (c == '=') {
+                } else if (c == '=') {
                     reqdToken = LE;
                     dfaState = 1;
                 } else {
@@ -221,6 +223,7 @@ void findAndAddTokens() {
                     dfaState = 8;
                 } else {
                     expectedSeq = "<---";
+                    reqdToken = ASSIGN_OP;
                     dfaState = 26;
                 }
                 break;
@@ -231,6 +234,7 @@ void findAndAddTokens() {
                     dfaState = 1;
                 } else {
                     expectedSeq = "<---";
+                    reqdToken = ASSIGN_OP;
                     dfaState = 26;
                 }
                 break;
@@ -251,6 +255,7 @@ void findAndAddTokens() {
                     dfaState = 1;
                 } else {
                     expectedSeq = "!=";
+                    reqdToken = NE;
                     dfaState = 26;
                 }
                 break;
@@ -261,6 +266,7 @@ void findAndAddTokens() {
                     dfaState = 1;
                 } else {
                     expectedSeq = "==";
+                    reqdToken = EQ;
                     dfaState = 26;
                 }
                 break;
@@ -270,6 +276,7 @@ void findAndAddTokens() {
                     dfaState = 13;
                 } else {
                     expectedSeq = "@@@";
+                    reqdToken = OR;
                     dfaState = 26;
                 }
                 break;
@@ -280,6 +287,7 @@ void findAndAddTokens() {
                     dfaState = 1;
                 } else {
                     expectedSeq = "@@@";
+                    reqdToken = OR;
                     dfaState = 26;
                 }
                 break;
@@ -354,6 +362,7 @@ void findAndAddTokens() {
                 if (isInRange(c, 'a', 'z') || isInRange(c, 'A', 'Z')) {
                     dfaState = 22;
                 } else {
+                    reqdToken = FUN_ID;
                     dfaState = 28;
                 }
                 break;
@@ -382,6 +391,7 @@ void findAndAddTokens() {
                 if (isInRange(c, 'a', 'z')) {
                     dfaState = 25;
                 } else {
+                    reqdToken = RECORD_ID;
                     dfaState = 28;
                 }
                 break;
@@ -398,33 +408,37 @@ void findAndAddTokens() {
                 retractChar();
                 lexeme = getLexemeFromBuf();
                 printf("Line %d: Syntax Error. Invalid Sequence %s, Expected %s\n", lineNo, lexeme, expectedSeq);
+                addStrLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 27:
                 retractChar();
                 lexeme = getLexemeFromBuf();
                 printf("Line %d: Syntax Error. Invalid Real Number %s, Real Numbers must have exactly two digits after the decimal\n", lineNo, lexeme);
+                addRealNumToStream(lexeme, R_NUM, lineNo, 1);
                 dfaState = 0;
                 break;
             case 28:
                 retractChar();
                 lexeme = getLexemeFromBuf();
                 printf("Line %d: Syntax Error. Invalid Sequence %s, Expected %s\n", lineNo, lexeme, "");
+                addStrLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 29:
-                printf("Line %d: Syntax Error. Invalid Char %d\n", lineNo, c);
+                printf("Line %d: Syntax Error. Invalid Char %c\n", lineNo, c);
+                skipChar();
                 dfaState = 0;
                 break;
             case 30:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addNumToStream(lexeme, NUM, lineNo);
+                addNumToStream(lexeme, NUM, lineNo, 0);
                 dfaState = 0;
                 break;
             case 31:
                 lexeme = getLexemeFromBuf();
-                addRealNumToStream(lexeme, R_NUM, lineNo);
+                addRealNumToStream(lexeme, R_NUM, lineNo, 0);
                 dfaState = 0;
                 break;
             case 32:

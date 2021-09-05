@@ -29,6 +29,10 @@ void freeSet(int** set) {
     set = NULL;
 }
 
+int followSetContains(NonTerminal nonTerminal, Token token) {
+    return isBitSet(followSet[nonTerminal], token);
+}
+
 void initFirstAndFollowSets() {
     firstSet = initSet();
     followSet = initSet();
@@ -187,13 +191,22 @@ void addFirstSetToTable(NonTerminal nonTerminal, GrammarEle* ele, int ruleNo) {
     addSetToTable(nonTerminal, tempFollow, ruleNo);
 }
 
+void fillTableEntriesWithRule(NonTerminal nonTerminal, int ruleNo) {
+    for(int i = 0; i < NUM_TOKENS; i++) {
+        if (parseTable[nonTerminal][i] == -1) {
+            parseTable[nonTerminal][i] = ruleNo;
+        }
+    }
+}
+
 void populateParseTable() {
     for(int i = 0; i < NUM_RULES; i++) {
         GrammarEle* ele = getGrammarRule(i);
         NonTerminal head = ele ->symbol ->nonTerminal;
         ele = ele ->next;
         if(ele ->isTerminal && ele ->symbol ->token == EPS) {
-            addSetToTable(head, followSet[head], i);
+            //addSetToTable(head, followSet[head], i);
+            fillTableEntriesWithRule(head, i);
         } else {
             addFirstSetToTable(head, ele, i);
         }
@@ -230,19 +243,19 @@ void computeParseTable() {
 
 //debug
 void printFirstSet() {
-    // for(int i = 0; i < NUM_NON_TERMINALS; i++) {
-    //     printf("%s: ", getNonTerminalStr(i));
-    //     for(int j = 0; j < NUM_TOKENS; j++) {
-    //         if (isBitSet(firstSet[i], j)) {
-    //             printf("%s ", getTokenStr(j));
-    //         }
-    //     }
-    //     printf("\t|\t");
-    //     for(int j = 0; j < NUM_TOKENS; j++) {
-    //         if(isBitSet(followSet[i], j)) {
-    //             printf("%s ", getTokenStr(j));
-    //         }
-    //     }
-    //     printf("\n");
-    // }
+    for(int i = 0; i < NUM_NON_TERMINALS; i++) {
+        printf("%s: ", getNonTerminalStr(i));
+        for(int j = 0; j < NUM_TOKENS; j++) {
+            if (isBitSet(firstSet[i], j)) {
+                printf("%s ", getTokenStr(j));
+            }
+        }
+        printf("\t|\t");
+        for(int j = 0; j < NUM_TOKENS; j++) {
+            if(isBitSet(followSet[i], j)) {
+                printf("%s ", getTokenStr(j));
+            }
+        }
+        printf("\n");
+    }
 }

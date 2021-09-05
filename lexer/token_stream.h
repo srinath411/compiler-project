@@ -2,7 +2,7 @@
 #define TOKEN_STREAM_H
 #include "../common/symbols.h"
 
-typedef union lexeme
+typedef union Lexeme
 {
     char* str;
     int num;
@@ -10,19 +10,21 @@ typedef union lexeme
 } Lexeme;
 
 
-typedef struct tokenEle {
+typedef struct TokenEle {
     Token token;
     Lexeme* lexeme;
     int lineNo;
-    struct tokenEle* next;
-}tokenEle;
+    int hasError;
+    struct TokenEle* next;
+} TokenEle;
 
-tokenEle* createNewTokenEle(Lexeme* lexeme, Token token, int lineNo);
+TokenEle* createNewTokenEle(Lexeme* lexeme, Token token, int lineNo, int hasError);
 void initTokenStream();
-void appendTokenEle(tokenEle* ele);
-tokenEle* getTokenFromStream();
-void freeTokenEle(tokenEle* ele);
+void appendTokenEle(TokenEle* ele);
+TokenEle* getTokenFromStream();
+void freeTokenEle(TokenEle* ele);
 void freeTokenStream();
+void printTokenStream();
 Lexeme* getEmptyLexeme();
 Lexeme* getCopyOfLexeme(Lexeme* l1, Token token);
 void addDollarAtEnd();

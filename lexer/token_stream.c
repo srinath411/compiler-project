@@ -1,46 +1,50 @@
+#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include "token_stream.h"
 
-tokenEle* tokenStream = NULL;
-tokenEle* last = NULL;
+TokenEle* tokenStream = NULL;
+TokenEle* last = NULL;
+TokenEle* start = NULL;
 
-tokenEle* createNewTokenEle(Lexeme* lexeme, Token token, int lineNo) {
-    tokenEle* ele = (tokenEle*) malloc(sizeof(tokenEle));
+TokenEle* createNewTokenEle(Lexeme* lexeme, Token token, int lineNo, int hasError) {
+    TokenEle* ele = (TokenEle*) malloc(sizeof(TokenEle));
     ele ->lexeme = lexeme;
     ele ->token = token;
     ele ->lineNo = lineNo;
     ele ->next = NULL;
+    ele ->hasError = hasError;
     return ele;
 }
 
 void initTokenStream() {
     tokenStream = NULL;
     last = NULL;
+    start = NULL;
 }
 
-void appendTokenEle(tokenEle* ele) {
+void appendTokenEle(TokenEle* ele) {
     if (tokenStream == NULL) {
         tokenStream = ele;
         last = ele;
+        start = ele;
     } else {
         last ->next = ele;
         last = ele;
     }
 }
 
-tokenEle* getTokenFromStream() {
-    if (tokenStream == NULL) {
-        return tokenStream;
+TokenEle* getTokenFromStream() {
+    if (start == NULL) {
+        return NULL;
     } else {
-        tokenEle* temp = tokenStream;
-        tokenStream = tokenStream ->next;
-        temp ->next = NULL;
+        TokenEle* temp = start;
+        start = start ->next;
         return temp;
     }
 }
 
-void freeTokenEle(tokenEle* ele) {
+void freeTokenEle(TokenEle* ele) {
     if (ele ->lexeme != NULL) {
         free(ele ->lexeme);
         ele ->lexeme = NULL;
@@ -51,7 +55,7 @@ void freeTokenEle(tokenEle* ele) {
 }
 
 void freeTokenStream() {
-    tokenEle* temp = NULL;
+    TokenEle* temp = NULL;
     while(tokenStream != NULL) {
         temp = tokenStream;
         tokenStream = tokenStream ->next;
@@ -59,6 +63,14 @@ void freeTokenStream() {
     }
     temp = NULL;
     last = NULL;
+}
+
+void printTokenStream() {
+    TokenEle* head = tokenStream;
+    while(head != NULL) {
+        printf("Line %d: Token %s\n", head ->lineNo, getTokenStr(head ->token));
+        head = head ->next;
+    }
 }
 
 Lexeme* getEmptyLexeme() {
@@ -89,6 +101,6 @@ void addDollarAtEnd() {
     lexeme ->str = "$";
     Token token = DOLLAR;
     int lineNo = (last == NULL) ? 0 : last ->lineNo;
-    tokenEle* ele = createNewTokenEle(lexeme, token, lineNo);
+    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, 0);
     appendTokenEle(ele);
 }
