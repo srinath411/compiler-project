@@ -13,6 +13,7 @@ typedef struct Stack {
 Stack* createNewStack();
 void push(Stack* stack, TreeNode* ele);
 TreeNode* pop(Stack* stack);
+TreeNode* peek(Stack* stack);
 void freeStack(Stack* stack);
 
 #endif

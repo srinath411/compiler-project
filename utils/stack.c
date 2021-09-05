@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include "stack.h"
-#define ARR_SIZE 20
+#define ARR_SIZE 50
 
 Stack* createNewStack() {
     Stack* stack = (Stack*) malloc (sizeof(Stack));
@@ -26,7 +26,6 @@ void push(Stack* stack, TreeNode* ele) {
 
 TreeNode* pop(Stack* stack) {
     if (stack ->stackSize == 0) {
-        printf("Stack Error\n");
         return NULL;
     }
     stack ->stackSize--;
@@ -34,6 +33,13 @@ TreeNode* pop(Stack* stack) {
     stack ->arr[stack ->top] = NULL;
     stack ->top--;
     return ele;
+}
+
+TreeNode* peek(Stack* stack) {
+    if (stack ->stackSize == 0) {
+        return NULL;
+    }
+    return stack ->arr[stack ->top];
 }
 
 void freeStack(Stack* stack) {
