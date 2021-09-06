@@ -1,15 +1,20 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-typedef struct hashEle {
+typedef struct HashEle {
     char* str;
     int val;
-    struct hashEle* next;
-} hashEle;
+    struct HashEle* next;
+} HashEle;
 
-hashEle** initHashTable(char* arr[], int arrLen, int numBuckets);
-int findEleInTable(hashEle** buckets, int numBuckets, char* str);
-void freeHashTable(hashEle** buckets, int numBuckets);
-void printHashTable(hashEle** buckets, int numBuckets);
+typedef struct HashTable {
+    HashEle** buckets;
+    int numBuckets;
+} HashTable;
+
+HashTable* initHashTable(char* arr[], int arrLen);
+int findEleInTable(HashTable* hashTable, char* str);
+void freeHashTable(HashTable* hashTable);
+void printHashTable(HashTable* hashTable);
 
 #endif

@@ -3,33 +3,47 @@
 #include<string.h>
 #include "hash_table.h"
 
-int hashFunction(char* str, int numBuckets) {
-    int asciiSum = 0;
-    for(int i = 0; str[i] != '\0'; i++) {
-        asciiSum = (asciiSum + str[i]) % numBuckets;
+int getNumBuckets(int arrLen) {
+    arrLen--;
+    int numBuckets = 2;
+    while(arrLen >>= 1) {
+        numBuckets <<= 1;
     }
-    return asciiSum;
+    return numBuckets;
 }
 
-hashEle** initHashTable(char* arr[], int arrLen, int numBuckets) {
-    hashEle** buckets = (hashEle**) malloc(numBuckets * (sizeof(hashEle*)));
+int hashFunction(char* str, int numBuckets) {
+    numBuckets--;
+    int hash = 5381;
+    for(int i = 0; str[i] != '\0'; i++) {
+        hash = (((((hash << 5) & numBuckets) + hash) & numBuckets) + str[i]) & numBuckets;
+    }
+    return hash;
+}
+
+HashTable* initHashTable(char* arr[], int arrLen) {
+    int numBuckets = getNumBuckets(arrLen);
+    HashEle** buckets = (HashEle**) malloc(numBuckets * (sizeof(HashEle*)));
     for(int i = 0; i < numBuckets; i++) {
         buckets[i] = NULL;
     }
     for (int i = 0; i < arrLen; i++) {
         int bucketNo = hashFunction(arr[i], numBuckets);
-        hashEle* ele = (hashEle*) malloc (sizeof(hashEle));
+        HashEle* ele = (HashEle*) malloc (sizeof(HashEle));
         ele ->str = arr[i];
         ele ->val = i;
         ele ->next = buckets[bucketNo];
         buckets[bucketNo] = ele;
     }
-    return buckets;
+    HashTable* hashTable = (HashTable*) malloc(sizeof(HashTable));
+    hashTable ->buckets = buckets;
+    hashTable ->numBuckets = numBuckets;
+    return hashTable;
 }
 
-int findEleInTable(hashEle** buckets, int numBuckets, char* str) {
-    int bucketNo = hashFunction(str, numBuckets);
-    hashEle* head = buckets[bucketNo];
+int findEleInTable(HashTable* hashTable, char* str) {
+    int bucketNo = hashFunction(str, hashTable ->numBuckets);
+    HashEle* head = hashTable ->buckets[bucketNo];
     while(head != NULL) {
         if (strcmp(head ->str, str) == 0) {
             return head ->val;
@@ -39,24 +53,26 @@ int findEleInTable(hashEle** buckets, int numBuckets, char* str) {
     return -1;
 }
 
-void freeHashTable(hashEle** buckets, int numBuckets) {
-    for(int i = 0; i < numBuckets; i++) {
-        hashEle* head = buckets[i];
+void freeHashTable(HashTable* hashTable) {
+    for(int i = 0; i < hashTable ->numBuckets; i++) {
+        HashEle* head = hashTable ->buckets[i];
         while(head != NULL) {
-            hashEle* temp = head;
+            HashEle* temp = head;
             head = head ->next;
             free(temp);
             temp = NULL;
         }
-        buckets[i] = NULL;
+        hashTable ->buckets[i] = NULL;
     }
+    hashTable ->buckets = NULL;
+    free(hashTable);
 }
 
 //debug
-void printHashTable(hashEle** buckets, int numBuckets) {
-    for(int i = 0; i < numBuckets; i++) {
+void printHashTable(HashTable* hashTable) {
+    for(int i = 0; i < hashTable ->numBuckets; i++) {
         printf("Bucket %d: ", i);
-        hashEle* head = buckets[i];
+        HashEle* head = hashTable ->buckets[i];
         while(head != NULL) {
             printf("%s ", head ->str);
             head = head ->next;

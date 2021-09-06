@@ -16,20 +16,20 @@ char* nonTerminalStrs[] = {"program", "otherFunctions", "function", "inputParams
 "condStmt", "optionalElse", "callStmt", "optionalReturn", "ids", "otherIds", "allIdList", "allIds", "otherAlls", "ioStmt", "returnStmt",
 "mainFunction"};
 
-hashEle** tokenTable = NULL;
-hashEle** nonTerminalTable = NULL;
+HashTable* tokenTable = NULL;
+HashTable* nonTerminalTable = NULL;
 
 void storeAllSymbols() {
-    tokenTable = initHashTable(tokenStrs, NUM_TOKENS, TOKEN_BUCKETS);
-    nonTerminalTable = initHashTable(nonTerminalStrs, NUM_NON_TERMINALS, NON_TERMINAL_BUCKETS);
+    tokenTable = initHashTable(tokenStrs, NUM_TOKENS);
+    nonTerminalTable = initHashTable(nonTerminalStrs, NUM_NON_TERMINALS);
 }
 
 int findTokenFromStr(char* str) {
-    return findEleInTable(tokenTable, TOKEN_BUCKETS, str);
+    return findEleInTable(tokenTable, str);
 }
 
 int findNonTerminalFromString(char* str) {
-    return findEleInTable(nonTerminalTable, NON_TERMINAL_BUCKETS, str);
+    return findEleInTable(nonTerminalTable, str);
 }
 
 char* getTokenStr(Token token) {
@@ -41,14 +41,14 @@ char* getNonTerminalStr(NonTerminal nonTerminal) {
 }
 
 void freeTokenAndNonTerminalTables() {
-    freeHashTable(tokenTable, TOKEN_BUCKETS);
-    freeHashTable(nonTerminalTable, NON_TERMINAL_BUCKETS);
+    freeHashTable(tokenTable);
+    freeHashTable(nonTerminalTable);
     tokenTable = NULL;
     nonTerminalTable = NULL;
 }
 
 //debug
 void printTokenAndNonTerminalTables() {
-    printHashTable(tokenTable, TOKEN_BUCKETS);
-    printHashTable(nonTerminalTable, NON_TERMINAL_BUCKETS);
+    printHashTable(tokenTable);
+    printHashTable(nonTerminalTable);
 }
