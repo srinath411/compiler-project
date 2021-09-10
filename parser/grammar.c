@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "grammar.h"
+#include "../common/helper_functions.h"
 #include "../utils/hash_table.h"
 #include "../utils/scanner.h"
 
@@ -9,10 +10,6 @@ GrammarEle* grammar[NUM_RULES];
 
 int firstOccInRules[NUM_NON_TERMINALS];
 int lastOccInRules[NUM_NON_TERMINALS];
-
-int isInRanges(char c, char low, char high) {
-    return (c >= low) && (c <= high);
-}
 
 int getFirstOccurence(NonTerminal nonTerminal) {
     return firstOccInRules[nonTerminal];
@@ -45,9 +42,9 @@ void scanAndPopulateGrammar(char* filename) {
         switch(scanState) {
             case 0:
                 c = nextChar();
-                if (isInRanges(c, 'a', 'z')) {
+                if (isInRange(c, 'a', 'z')) {
                     scanState = 1;
-                } else if (isInRanges(c, 'A', 'Z')) {
+                } else if (isInRange(c, 'A', 'Z')) {
                     scanState = 2;
                 } else {
                     switch(c) {
@@ -64,7 +61,7 @@ void scanAndPopulateGrammar(char* filename) {
                 break;
             case 1:
                 c = nextChar();
-                if (!isInRanges(c, 'a', 'z') && !isInRanges(c, 'A', 'Z')) {
+                if (!isInRange(c, 'a', 'z') && !isInRange(c, 'A', 'Z')) {
                     retractChar();
                     GrammarEle* ele = (GrammarEle*) malloc (sizeof(GrammarEle));
                     ele ->isTerminal = 0;
@@ -92,7 +89,7 @@ void scanAndPopulateGrammar(char* filename) {
                 break;
             case 2:
                 c = nextChar();
-                if (!isInRanges(c, 'A', 'Z') && c != '_') {
+                if (!isInRange(c, 'A', 'Z') && c != '_') {
                     retractChar();
                     GrammarEle* ele = (GrammarEle*) malloc (sizeof(GrammarEle));
                     ele ->isTerminal = 1;
@@ -140,21 +137,5 @@ void freeGrammarRules() {
             temp = NULL;
         }
         grammar[i] = NULL;
-    }
-}
-
-void printGrammarRules() {
-    for(int i = 0; i < NUM_RULES; i++) {
-        GrammarEle* head = grammar[i];
-        printf("Rule %d: ", i);
-        while(head != NULL) {
-            if (head ->isTerminal) {
-                printf("%s ", getTokenStr(head ->symbol ->token));
-            } else {
-                printf("%s ", getNonTerminalStr(head ->symbol ->nonTerminal));
-            }
-            head = head ->next;
-        }
-        printf("\n");
     }
 }

@@ -16,6 +16,5 @@ GrammarEle* getGrammarRule(int ruleNo);
 void freeTokenAndNonTerminalTables();
 void freeGrammarRules();
 void printTokenAndNonTerminalTables();
-void printGrammarRules();
 
 #endif

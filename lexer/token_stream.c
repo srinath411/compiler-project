@@ -42,7 +42,7 @@ TokenEle* getTokenFromStream() {
         TokenEle* temp = start;
         start = start ->next;
         if (temp ->hasError) {
-            printSyntaxError(temp ->lineNo, temp ->hasError, temp ->lexeme);
+            printLexicalError(temp ->lineNo, temp ->hasError, temp ->lexeme);
         }
         return temp;
     }
@@ -72,7 +72,7 @@ void freeTokenStream() {
 void printTokenStream() {
     TokenEle* head = tokenStream;
     while(head != NULL) {
-        printf("Line %d: Token %s\n", head ->lineNo, getTokenStr(head ->token));
+        printf("Line %d: Token: %s Lexeme: %s\n", head ->lineNo, getTokenStr(head ->token), head ->lexeme);
         head = head ->next;
     }
 }

@@ -115,7 +115,7 @@ void findAndAddTokens() {
                         dfaState = 24;
                         break;
                     case '%':
-                        dfaState = 32;
+                        dfaState = 30;
                         break;
                 }
                 if (stateSet || dfaState > 0) {
@@ -257,7 +257,8 @@ void findAndAddTokens() {
                 } else if (c == '.') {
                     dfaState = 15;
                 } else {
-                    dfaState = 30;
+                    reqdToken = NUM;
+                    dfaState = 2;
                 }
                 break;
             case 15:
@@ -271,7 +272,8 @@ void findAndAddTokens() {
             case 16:
                 c = nextChar();
                 if (isInRange(c, '0', '9')) {
-                    dfaState = 31;
+                    reqdToken = R_NUM;
+                    dfaState = 1;
                 } else {
                     dfaState = 27;
                 }
@@ -387,17 +389,6 @@ void findAndAddTokens() {
                 dfaState = 0;
                 break;
             case 30:
-                retractChar();
-                lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, NUM, lineNo, 0);
-                dfaState = 0;
-                break;
-            case 31:
-                lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, R_NUM, lineNo, 0);
-                dfaState = 0;
-                break;
-            case 32:
                 c = nextChar();
                 skipChar();
                 if (c == '\n') {

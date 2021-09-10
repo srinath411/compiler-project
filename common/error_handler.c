@@ -7,7 +7,7 @@ void printError(char* errorClass, int lineNo, char* errorCause, char* errorDesc)
     printf("%s Line %d: %s %s\n", errorClass, lineNo, errorCause, errorDesc);
 }
 
-void printSyntaxError(int lineNo, int errorType, char* lexeme) {
+void printLexicalError(int lineNo, int errorType, char* lexeme) {
     char errorCause[MAX_CAUSE_SIZE] = {'\0'};
     char errorDesc[MAX_DESC_SIZE] = {'\0'};
     switch(errorType) {
