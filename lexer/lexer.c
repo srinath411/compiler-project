@@ -407,27 +407,24 @@ void findAndAddTokens() {
             case 26:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                printf("Line %d: Syntax Error. Invalid Sequence %s, Expected %s\n", lineNo, lexeme, expectedSeq);
                 addStrLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 27:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                printf("Line %d: Syntax Error. Invalid Real Number %s, Real Numbers must have exactly two digits after the decimal\n", lineNo, lexeme);
-                addRealNumToStream(lexeme, R_NUM, lineNo, 1);
+                addStrLexToStream(lexeme, R_NUM, lineNo, 2);
                 dfaState = 0;
                 break;
             case 28:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                printf("Line %d: Syntax Error. Invalid Sequence %s, Expected %s\n", lineNo, lexeme, "");
                 addStrLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 29:
-                printf("Line %d: Syntax Error. Invalid Char %c\n", lineNo, c);
-                skipChar();
+                lexeme = getLexemeFromBuf();
+                addStrLexToStream(lexeme, ERR, lineNo, 3);
                 dfaState = 0;
                 break;
             case 30:

@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include "../common/error_handler.h"
 #include "../lexer/token_stream.h"
 #include "grammar.h"
 #include "parse_tree.h"
@@ -38,37 +39,37 @@ void parseTokens() {
                 if (token == streamEle ->token) {
                     node ->info ->leaf ->lexeme = getCopyOfLexeme(streamEle ->lexeme, token);
                 } else {
-                    if (!streamEle ->hasError) {
-                        printf("Syntax Error!!! Line %d: Expected: %s Got: %s\n", 
-                            streamEle ->lineNo, getTokenStr(token), getTokenStr(streamEle ->token));
-                        TreeNode* tempNode = peek(stack);
-                        if (tempNode != NULL) {
-                            if (tempNode ->nodeType == leafNodeType) {
-                                while(streamEle != NULL) {
-                                    if (tempNode ->info ->leaf ->token == streamEle ->token) {
-                                        break;
-                                    } else if (token == streamEle ->token) {
-                                        push(stack, node);
-                                        break;
-                                    }
-                                    streamEle = getTokenFromStream();
-                                }
-                                continue;
-                            } else {
-                                while(streamEle != NULL) {
-                                    if (getRuleNoFromTable(tempNode ->info ->parent ->nonTerminal, streamEle ->token) != -1) {
-                                        break;
-                                    } else if (token == streamEle ->token) {
-                                        push(stack, node);
-                                        break;
-                                    }
-                                    streamEle = getTokenFromStream();
-                                }
-                                continue;
-                            }
-                        } else {
+                    TreeNode* tempNode = peek(stack);
+                    TokenEle* tempEle = streamEle;
+                    if (tempNode != NULL) {
+                        if (tempNode ->nodeType == leafNodeType) {
                             while(streamEle != NULL) {
                                 if (token == streamEle ->token) {
+                                    if (!tempEle ->hasError) {
+                                        printParsingError(streamEle ->lineNo, 4, getTokenStr(token), getTokenStr(streamEle ->token));
+                                    }
+                                    push(stack, node);
+                                    break;
+                                } else if (tempNode ->info ->leaf ->token == streamEle ->token) {
+                                    if (!tempEle ->hasError) {
+                                        printParsingError(streamEle ->lineNo, 5, getTokenStr(token), getTokenStr(streamEle ->token));
+                                    }
+                                    break;
+                                }
+                                streamEle = getTokenFromStream();
+                            }
+                            continue;
+                        } else {
+                            while(streamEle != NULL) {
+                                if (getRuleNoFromTable(tempNode ->info ->parent ->nonTerminal, streamEle ->token) != -1) {
+                                    if (!tempEle ->hasError) {
+                                        printParsingError(streamEle ->lineNo, 5, getTokenStr(token), getTokenStr(streamEle ->token));
+                                    }
+                                    break;
+                                } else if (token == streamEle ->token) {
+                                    if (!tempEle ->hasError) {
+                                        printParsingError(streamEle ->lineNo, 4, getTokenStr(token), getTokenStr(streamEle ->token));
+                                    }
                                     push(stack, node);
                                     break;
                                 }
@@ -76,6 +77,18 @@ void parseTokens() {
                             }
                             continue;
                         }
+                    } else {
+                        while(streamEle != NULL) {
+                            if (token == streamEle ->token) {
+                                if (!tempEle ->hasError) {
+                                    printParsingError(streamEle ->lineNo, 4, getTokenStr(token), getTokenStr(streamEle ->token));
+                                }
+                                push(stack, node);
+                                break;
+                            }
+                            streamEle = getTokenFromStream();
+                        }
+                        continue;
                     }
                 }
                 streamEle = getTokenFromStream();
@@ -84,8 +97,9 @@ void parseTokens() {
             NonTerminal nonTerminal = node ->info ->parent ->nonTerminal;
             int ruleNo = getRuleNoFromTable(nonTerminal, streamEle ->token);
             if (ruleNo == -1) {
-                printf("Syntax Error!!! Line %d: NonTerminal: %s Token: %s\n", 
-                    streamEle ->lineNo, getNonTerminalStr(nonTerminal), getTokenStr(streamEle ->token));
+                if (!streamEle ->hasError) {
+                    printParsingError(streamEle ->lineNo, 4, getTokenStr(nonTerminal), getTokenStr(streamEle ->token));
+                }
                 TreeNode* epsNode = createTreeNode(EPS, leafNodeType);
                 epsNode ->lineNo = streamEle ->lineNo;
                 addChildToNode(node, epsNode);

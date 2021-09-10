@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "token_stream.h"
+#include "../common/error_handler.h"
 
 TokenEle* tokenStream = NULL;
 TokenEle* last = NULL;
@@ -40,6 +41,9 @@ TokenEle* getTokenFromStream() {
     } else {
         TokenEle* temp = start;
         start = start ->next;
+        if (temp ->hasError) {
+            printSyntaxError(temp ->lineNo, temp ->hasError, temp ->lexeme ->str);
+        }
         return temp;
     }
 }
