@@ -8,7 +8,7 @@ TokenEle* tokenStream = NULL;
 TokenEle* last = NULL;
 TokenEle* start = NULL;
 
-TokenEle* createNewTokenEle(Lexeme* lexeme, Token token, int lineNo, int hasError) {
+TokenEle* createNewTokenEle(char* lexeme, Token token, int lineNo, int hasError) {
     TokenEle* ele = (TokenEle*) malloc(sizeof(TokenEle));
     ele ->lexeme = lexeme;
     ele ->token = token;
@@ -42,7 +42,7 @@ TokenEle* getTokenFromStream() {
         TokenEle* temp = start;
         start = start ->next;
         if (temp ->hasError) {
-            printSyntaxError(temp ->lineNo, temp ->hasError, temp ->lexeme ->str);
+            printSyntaxError(temp ->lineNo, temp ->hasError, temp ->lexeme);
         }
         return temp;
     }
@@ -77,32 +77,9 @@ void printTokenStream() {
     }
 }
 
-Lexeme* getEmptyLexeme() {
-    Lexeme* lexeme = (Lexeme*) malloc (sizeof(Lexeme));
-    return lexeme;
-}
-
-Lexeme* getCopyOfLexeme(Lexeme* l1, Token token) {
-    Lexeme* l2 = getEmptyLexeme();
-    if (token == NUM) {
-        l2 ->num = l1 ->num;
-    } else if (token == R_NUM) {
-        l2 ->rnum = l1 ->rnum;
-    } else {
-        int len = strlen(l1 ->str) + 1;
-        char* lex = (char*) malloc(len * (sizeof(char)));
-        for (int i = 0; i < len; i++) {
-            lex[i] = l1 ->str[i];
-        }
-        lex[len - 1] = '\0';
-        l2 ->str = lex;
-    }
-    return l2;
-}
-
 void addDollarAtEnd() {
-    Lexeme* lexeme = getEmptyLexeme();
-    lexeme ->str = "$";
+    char* lexeme = (char*) malloc (2 * sizeof(char));
+    strcpy(lexeme, "$");
     Token token = DOLLAR;
     int lineNo = (last == NULL) ? 0 : last ->lineNo;
     TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, 0);

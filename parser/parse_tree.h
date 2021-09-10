@@ -14,7 +14,7 @@ typedef struct ParentNodeInfo {
 
 typedef struct LeafNodeInfo {
     Token token;
-    Lexeme* lexeme;
+    char* lexeme;
 } LeafNodeInfo;
 
 typedef union NodeInfo {

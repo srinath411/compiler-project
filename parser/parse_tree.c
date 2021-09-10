@@ -40,13 +40,7 @@ void printTree(TreeNode* node) {
         if (token == EPS) {
             printf("epsilon\n");
         } else if (node ->info ->leaf ->lexeme != NULL) {
-            if (token == NUM) {
-                printf("%d\n", node ->info ->leaf ->lexeme ->num);
-            } else if (token == R_NUM) {
-                printf("%f\n", node ->info ->leaf ->lexeme ->rnum);
-            } else {
-                printf("%s\n", node ->info ->leaf ->lexeme ->str);
-            }
+            printf("%s\n", node ->info ->leaf ->lexeme);
         } else {
             printf("null\n");
         }

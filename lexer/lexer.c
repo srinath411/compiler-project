@@ -2,44 +2,11 @@
 #include<stdlib.h>
 #include<string.h>
 #include "keywords.h"
+#include "../common/helper_functions.h"
 #include "../lexer/token_stream.h"
 #include "../utils/scanner.h"
 
-int isInRange(char c, char low, char high) {
-    return (c >= low) && (c <= high);
-}
-
-int stringToInteger(char* str) {
-    int num;
-    sscanf(str, "%d", &num);
-    return num;
-}
-
-float stringToFloat(char* str) {
-    float f;
-    sscanf(str, "%f", &f);
-    return f;
-}
-
-void addStrLexToStream(char* lex, Token token, int lineNo, int hasError) {
-    Lexeme* lexeme = getEmptyLexeme();
-    lexeme ->str = lex;
-    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
-    appendTokenEle(ele);
-}
-
-void addNumToStream(char* lex, Token token, int lineNo, int hasError) {
-    int num = stringToInteger(lex);
-    Lexeme* lexeme = getEmptyLexeme();
-    lexeme ->num = num;
-    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
-    appendTokenEle(ele);
-}
-
-void addRealNumToStream(char* lex, Token token, int lineNo, int hasError) {
-    float rnum = stringToFloat(lex);
-    Lexeme* lexeme = getEmptyLexeme();
-    lexeme ->rnum = rnum;
+void addStrLexToStream(char* lexeme, Token token, int lineNo, int hasError) {
     TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
     appendTokenEle(ele);
 }
@@ -47,7 +14,7 @@ void addRealNumToStream(char* lex, Token token, int lineNo, int hasError) {
 void findAndAddTokens() {
     int dfaState = 0, lineNo = 1, stateSet = 0;
     char c;
-    char *lexeme = NULL, *expectedSeq = NULL;
+    char *lexeme = NULL;
     Token reqdToken = -1;
     while(1) {
         switch(dfaState) {
@@ -189,7 +156,6 @@ void findAndAddTokens() {
                 if (c == '&') {
                     dfaState = 5;
                 } else {
-                    expectedSeq = "&&&";
                     reqdToken = AND;
                     dfaState = 26;
                 }
@@ -200,7 +166,6 @@ void findAndAddTokens() {
                     reqdToken = AND;
                     dfaState = 1;
                 } else {
-                    expectedSeq = "&&&";
                     reqdToken = AND;
                     dfaState = 26;
                 }
@@ -222,7 +187,6 @@ void findAndAddTokens() {
                 if (c == '-') {
                     dfaState = 8;
                 } else {
-                    expectedSeq = "<---";
                     reqdToken = ASSIGN_OP;
                     dfaState = 26;
                 }
@@ -233,7 +197,6 @@ void findAndAddTokens() {
                     reqdToken = ASSIGN_OP;
                     dfaState = 1;
                 } else {
-                    expectedSeq = "<---";
                     reqdToken = ASSIGN_OP;
                     dfaState = 26;
                 }
@@ -254,7 +217,6 @@ void findAndAddTokens() {
                     reqdToken = NE;
                     dfaState = 1;
                 } else {
-                    expectedSeq = "!=";
                     reqdToken = NE;
                     dfaState = 26;
                 }
@@ -265,7 +227,6 @@ void findAndAddTokens() {
                     reqdToken = EQ;
                     dfaState = 1;
                 } else {
-                    expectedSeq = "==";
                     reqdToken = EQ;
                     dfaState = 26;
                 }
@@ -275,7 +236,6 @@ void findAndAddTokens() {
                 if (c == '@') {
                     dfaState = 13;
                 } else {
-                    expectedSeq = "@@@";
                     reqdToken = OR;
                     dfaState = 26;
                 }
@@ -286,7 +246,6 @@ void findAndAddTokens() {
                     reqdToken = OR;
                     dfaState = 1;
                 } else {
-                    expectedSeq = "@@@";
                     reqdToken = OR;
                     dfaState = 26;
                 }
@@ -430,12 +389,12 @@ void findAndAddTokens() {
             case 30:
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addNumToStream(lexeme, NUM, lineNo, 0);
+                addStrLexToStream(lexeme, NUM, lineNo, 0);
                 dfaState = 0;
                 break;
             case 31:
                 lexeme = getLexemeFromBuf();
-                addRealNumToStream(lexeme, R_NUM, lineNo, 0);
+                addStrLexToStream(lexeme, R_NUM, lineNo, 0);
                 dfaState = 0;
                 break;
             case 32:

@@ -37,7 +37,7 @@ void parseTokens() {
             Token token = node ->info ->leaf ->token;
             if (token != EPS) {
                 if (token == streamEle ->token) {
-                    node ->info ->leaf ->lexeme = getCopyOfLexeme(streamEle ->lexeme, token);
+                    node ->info ->leaf ->lexeme = streamEle ->lexeme;
                 } else {
                     TreeNode* tempNode = peek(stack);
                     TokenEle* tempEle = streamEle;
