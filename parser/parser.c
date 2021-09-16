@@ -80,14 +80,7 @@ void parseTokens() {
                             }
                         } else {
                             while(streamEle != NULL) {
-                                if (getRuleNoFromTable(tempNode ->info ->parent ->nonTerminal, streamEle ->token) != -1) {
-                                    // A token belonging to the first set of the next non-terminal on the stack was found
-                                    // The popped token is assumed to have been skipped
-                                    if (!tempEle ->hasError) {
-                                        printSyntaxError(streamEle ->lineNo, 5, getTokenStr(token), getTokenStr(tempEle ->token));
-                                    }
-                                    break;
-                                } else if (token == streamEle ->token) {
+                                if (token == streamEle ->token) {
                                     // The required token popped from stack was found at a later stage
                                     // This means previous tokens were garbage
                                     if (!tempEle ->hasError) {
@@ -95,13 +88,20 @@ void parseTokens() {
                                     }
                                     push(stack, node);
                                     break;
+                                } else if (firstSetContains(tempNode ->info ->parent ->nonTerminal, streamEle ->token) || followSetContains(tempNode ->info ->parent ->nonTerminal, streamEle ->token)) {
+                                    // A token belonging to the first/follow set of the next non-terminal on the stack was found
+                                    // The popped token is assumed to have been skipped
+                                    if (!tempEle ->hasError) {
+                                        printSyntaxError(streamEle ->lineNo, 5, getTokenStr(token), getTokenStr(tempEle ->token));
+                                    }
+                                    break;
                                 }
                                 streamEle = getTokenFromStream();
                             }
                         }
                     } else {
                         while(streamEle != NULL) {
-                            // Straightforward panic mode
+                            // Wait till we get the token or the stream exhausts
                             if (token == streamEle ->token) {
                                 // The required token popped from stack was found at a later stage
                                 // This means previous tokens were garbage

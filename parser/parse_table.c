@@ -40,6 +40,13 @@ void freeSet(int** set) {
 }
 
 /*
+ * Returns 1 if first set of nonterminal contains token, 0 otherwise
+ */
+int firstSetContains(NonTerminal nonTerminal, Token token) {
+    return isBitSet(firstSet[nonTerminal], token);
+}
+
+/*
  * Returns 1 if follow set of nonterminal contains token, 0 otherwise
  */
 int followSetContains(NonTerminal nonTerminal, Token token) {

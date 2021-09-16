@@ -5,7 +5,7 @@
 #include "parser/parser.h"
 #include "parser/grammar.h"
 #include "parser/parse_table.h"
-#define INPUT_FILE "input_file.txt"
+#define INPUT_FILE "testcases/4w.txt"
 #define GRAMMAR_FILE "Grammar.txt"
 
 int getChoice();

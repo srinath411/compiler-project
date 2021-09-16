@@ -3,6 +3,7 @@
 
 #include "../common/symbols.h"
 
+int firstSetContains(NonTerminal nonTerminal, Token token);
 int followSetContains(NonTerminal nonTerminal, Token token);
 void computeParseTable();
 int getRuleNoFromTable(NonTerminal nonTerminal, Token token);
