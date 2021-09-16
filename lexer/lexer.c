@@ -2,20 +2,26 @@
 #include<stdlib.h>
 #include<string.h>
 #include "keywords.h"
-#include "../common/helper_functions.h"
+#include "../utils/helper_functions.h"
 #include "../lexer/token_stream.h"
 #include "../utils/scanner.h"
 
-void addStrLexToStream(char* lexeme, Token token, int lineNo, int hasError) {
+/*
+ * Creates TokenEle and appends to token stream
+ */
+void addLexToStream(char* lexeme, Token token, int lineNo, int hasError) {
     TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, hasError);
     appendTokenEle(ele);
 }
 
+/*
+ * Scans entire file and creates tokens based on dfa
+ */
 void findAndAddTokens() {
     int dfaState = 0, lineNo = 1, stateSet = 0;
     char c;
     char *lexeme = NULL;
-    Token reqdToken = -1;
+    Token reqdToken = ERR;
     while(1) {
         switch(dfaState) {
             case 0:
@@ -23,6 +29,7 @@ void findAndAddTokens() {
                 c = nextChar();
                 switch(c) {
                     case EOF:
+                        // Finished scanning
                         return;
                     case '\0':
                     case ' ':
@@ -30,10 +37,12 @@ void findAndAddTokens() {
                     case '\f':
                     case '\v':
                     case '\r':
+                        // Garbage characters - should simply skip
                         skipChar();
                         stateSet = 1;
                         break;
                     case '\n':
+                        // Also skip, but increment line number
                         lineNo++;
                         skipChar();
                         stateSet = 1;
@@ -119,36 +128,44 @@ void findAndAddTokens() {
                         break;
                 }
                 if (stateSet || dfaState > 0) {
+                    // New state already assigned
                     break;
                 } else if (isInRange(c, '0', '9')) {
+                    // Could be NUM or R_NUM
                     dfaState = 14;
                 } else if (isInRange(c, 'b', 'd')) {
+                    // Could be ID
                     dfaState = 17;
                 } else if (isInRange(c, 'a', 'z')) {
+                    // Could be FIELD_ID
                     dfaState = 20;
                 } else {
+                    // Invalid char
                     dfaState = 29;
                 }
                 break;
             case 1:
+                // Directly accept
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
+                addLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 2:
+                // Retract and then accept
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
+                addLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 3:
+                // Again retracting state, but check for keywords before accepting
                 retractChar();
                 lexeme = getLexemeFromBuf();
                 Token tempToken = getKeywordIfPresent(lexeme);
                 if (tempToken != -1) {
                     reqdToken = tempToken;
                 }
-                addStrLexToStream(lexeme, reqdToken, lineNo, 0);
+                addLexToStream(lexeme, reqdToken, lineNo, 0);
                 dfaState = 0;
                 break;
             case 4:
@@ -366,29 +383,34 @@ void findAndAddTokens() {
                 }
                 break;
             case 26:
+                // Invalid sequence error
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo, 1);
+                addLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 27:
+                // Invalid Real Num error
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, R_NUM, lineNo, 2);
+                addLexToStream(lexeme, R_NUM, lineNo, 2);
                 dfaState = 0;
                 break;
             case 28:
+                // Invalid sequence error
                 retractChar();
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, reqdToken, lineNo, 1);
+                addLexToStream(lexeme, reqdToken, lineNo, 1);
                 dfaState = 0;
                 break;
             case 29:
+                // Invalid char error
                 lexeme = getLexemeFromBuf();
-                addStrLexToStream(lexeme, ERR, lineNo, 3);
+                addLexToStream(lexeme, ERR, lineNo, 3);
                 dfaState = 0;
                 break;
             case 30:
+                // Comment encountered, skip until next line
                 c = nextChar();
                 skipChar();
                 if (c == '\n') {
@@ -400,6 +422,9 @@ void findAndAddTokens() {
     }
 }
 
+/*
+ * Scans input file and tokenizes code
+ */
 void tokenizeCode(char* filename) {
     int hasError = initScanner(filename);
     if (hasError) {

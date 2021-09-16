@@ -12,15 +12,24 @@ char* keywordStrings[] = {"with", "parameters", "end", "while", "int", "real", "
 Token keywordTokens[] = {WITH, PARAMETERS, END, WHILE, INT, REAL, TYPE, MAIN, GLOBAL, PARAMETER, LIST, INPUT, OUTPUT, END_WHILE, IF, 
 THEN, END_IF, READ, WRITE, RETURN, CALL, RECORD, END_RECORD, ELSE};
 
+/*
+ * Initializes a hash table for keywords
+ */
 void initKeywordTable() {
     hashTable = initHashTable(keywordStrings, NUM_KEYWORDS);
 }
 
+/*
+ * Keyword string --> Token
+ */
 Token getKeywordIfPresent(char* lexeme) {
     int index = findEleInTable(hashTable, lexeme);
     return (index == -1) ? -1 : keywordTokens[index];
 }
 
+/*
+ * Deallocates memory from keyword table
+ */
 void freeKeywordTable() {
     freeHashTable(hashTable);
     hashTable = NULL;

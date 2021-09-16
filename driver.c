@@ -11,7 +11,7 @@
 int getChoice();
 void exitCompiler();
 void flushCompiledCode();
-int compiledCode;
+int compiledCode; // Indicates whether code has been compiled
 
 int main() {
     initGrammarRules(GRAMMAR_FILE);
@@ -24,13 +24,14 @@ int main() {
                 exitCompiler();
                 return 0;
             case 1:
+                // Flush first to save memory
                 flushCompiledCode();
                 tokenizeCode(INPUT_FILE);
                 parseTokens();
                 compiledCode = 1;
                 break;
             case 2:
-                printFirstSet();
+                printFirstAndFollowSets();
                 break;
             case 3:
                 printTokenStream();
@@ -46,6 +47,9 @@ int main() {
     return 0;
 }
 
+/*
+ * Get user's choice
+ */
 int getChoice() {
     int choice = 0;
     printf("0: Exit\n");
@@ -55,9 +59,13 @@ int getChoice() {
     printf("4: Print parse tree\n");
     printf("\nEnter your choice: ");
     scanf("%d", &choice);
+    printf("\n");
     return choice;
 }
 
+/*
+ * Flush data structures to enable recompiling
+ */
 void flushCompiledCode() {
     if (compiledCode) {
         freeTokenStream();
@@ -65,6 +73,9 @@ void flushCompiledCode() {
     }
 }
 
+/*
+ * Free data structures before exiting code
+ */
 void exitCompiler() {
     flushCompiledCode();
     freeGrammarRules();

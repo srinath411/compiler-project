@@ -8,6 +8,9 @@ TokenEle* tokenStream = NULL;
 TokenEle* last = NULL;
 TokenEle* start = NULL;
 
+/*
+ * Initializes and returns new TokenEle
+ */
 TokenEle* createNewTokenEle(char* lexeme, Token token, int lineNo, int hasError) {
     TokenEle* ele = (TokenEle*) malloc(sizeof(TokenEle));
     ele ->lexeme = lexeme;
@@ -18,12 +21,18 @@ TokenEle* createNewTokenEle(char* lexeme, Token token, int lineNo, int hasError)
     return ele;
 }
 
+/*
+ * Initializes Token Stream
+ */
 void initTokenStream() {
     tokenStream = NULL;
     last = NULL;
     start = NULL;
 }
 
+/*
+ * Appends TokenEle to Token Stream
+ */
 void appendTokenEle(TokenEle* ele) {
     if (tokenStream == NULL) {
         tokenStream = ele;
@@ -35,6 +44,21 @@ void appendTokenEle(TokenEle* ele) {
     }
 }
 
+/*
+ * Appends $ at the end of Token Stream to simplify parsing
+ */
+void addDollarAtEnd() {
+    char* lexeme = (char*) malloc (2 * sizeof(char));
+    strcpy(lexeme, "$");
+    Token token = DOLLAR;
+    int lineNo = (last == NULL) ? 0 : last ->lineNo;
+    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, 0);
+    appendTokenEle(ele);
+}
+
+/*
+ * Returns next TokenEle from Token Stream
+ */
 TokenEle* getTokenFromStream() {
     if (start == NULL) {
         return NULL;
@@ -42,12 +66,15 @@ TokenEle* getTokenFromStream() {
         TokenEle* temp = start;
         start = start ->next;
         if (temp ->hasError) {
-            printLexicalError(temp ->lineNo, temp ->hasError, temp ->lexeme);
+            printSyntaxError(temp ->lineNo, temp ->hasError, temp ->lexeme, "");
         }
         return temp;
     }
 }
 
+/*
+ * Deallocates memory from TokenEle
+ */
 void freeTokenEle(TokenEle* ele) {
     if (ele ->lexeme != NULL) {
         free(ele ->lexeme);
@@ -58,6 +85,9 @@ void freeTokenEle(TokenEle* ele) {
     ele = NULL;
 }
 
+/*
+ * Deallocates memory from Token Stream
+ */
 void freeTokenStream() {
     TokenEle* temp = NULL;
     while(tokenStream != NULL) {
@@ -69,19 +99,13 @@ void freeTokenStream() {
     last = NULL;
 }
 
+/*
+ * Prints the line number, token, and lexeme for each TokenEle in Token Stream
+ */
 void printTokenStream() {
     TokenEle* head = tokenStream;
     while(head != NULL) {
-        printf("Line %d: Token: %s Lexeme: %s\n", head ->lineNo, getTokenStr(head ->token), head ->lexeme);
+        printf("Line %d: %s %s\n", head ->lineNo, getTokenStr(head ->token), head ->lexeme);
         head = head ->next;
     }
-}
-
-void addDollarAtEnd() {
-    char* lexeme = (char*) malloc (2 * sizeof(char));
-    strcpy(lexeme, "$");
-    Token token = DOLLAR;
-    int lineNo = (last == NULL) ? 0 : last ->lineNo;
-    TokenEle* ele = createNewTokenEle(lexeme, token, lineNo, 0);
-    appendTokenEle(ele);
 }

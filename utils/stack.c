@@ -3,6 +3,9 @@
 #include "stack.h"
 #define ARR_SIZE 50
 
+/*
+ * Initializes and returns a new stack
+ */
 Stack* createNewStack() {
     Stack* stack = (Stack*) malloc (sizeof(Stack));
     stack ->top = -1;
@@ -15,6 +18,9 @@ Stack* createNewStack() {
     return stack;
 }
 
+/*
+ * Adds new element to the top of stack
+ */
 void push(Stack* stack, TreeNode* ele) {
     if (stack ->stackSize + 1 == stack ->arrSize) {
         printf("Stack Error\n");
@@ -24,6 +30,10 @@ void push(Stack* stack, TreeNode* ele) {
     stack ->arr[++stack ->top] = ele;
 }
 
+/*
+ * Removes element present at the top of stack and returns the element
+ * Returns Null if no element present
+ */
 TreeNode* pop(Stack* stack) {
     if (stack ->stackSize == 0) {
         return NULL;
@@ -35,6 +45,10 @@ TreeNode* pop(Stack* stack) {
     return ele;
 }
 
+/*
+ * Returns element present at the top of stack without removing
+ * Returns Null if no element present
+ */
 TreeNode* peek(Stack* stack) {
     if (stack ->stackSize == 0) {
         return NULL;
@@ -42,6 +56,9 @@ TreeNode* peek(Stack* stack) {
     return stack ->arr[stack ->top];
 }
 
+/*
+ * Frees memory allocated to stack
+ */
 void freeStack(Stack* stack) {
     if (stack != NULL && stack ->arr != NULL) {
         free(stack ->arr);

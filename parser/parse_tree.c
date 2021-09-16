@@ -2,6 +2,9 @@
 #include<stdlib.h>
 #include "parse_tree.h"
 
+/*
+ * Creates and returns new TreeNode with given info
+ */
 TreeNode* createTreeNode(int symbol, NodeType nodeType) {
     TreeNode* node = (TreeNode*) malloc (sizeof(TreeNode));
     node ->lchild = node ->rsib = node ->parent = NULL;
@@ -21,12 +24,18 @@ TreeNode* createTreeNode(int symbol, NodeType nodeType) {
     return node;
 }
 
+/*
+ * Sets required pointers to make childNode a child of parentNode
+ */
 void addChildToNode(TreeNode* parentNode, TreeNode* childNode) {
     childNode ->parent = parentNode;
     childNode ->rsib = parentNode ->lchild;
     parentNode ->lchild = childNode;
 }
 
+/*
+ * Prints parse tree in prefix format
+ */
 void printTree(TreeNode* node) {
     if (node == NULL) {
         return;
@@ -49,6 +58,9 @@ void printTree(TreeNode* node) {
     printTree(node ->rsib);
 }
 
+/*
+ * Frees parse tree
+ */
 void freeTree(TreeNode* node) {
     if (node == NULL) {
         return;
