@@ -42,7 +42,7 @@ void printTree(TreeNode* node) {
     }
     printf("Line %d: ", node ->lineNo);
     if (node ->nodeType == parentNodeType) {
-        printf("%s\n", getNonTerminalStr(node ->info ->parent ->nonTerminal));
+        printf("%s %d\n", getNonTerminalStr(node ->info ->parent ->nonTerminal), node ->info ->parent ->ruleNo);
     } else {
         Token token = node ->info ->leaf ->token;
         printf("%s ", getTokenStr(token));

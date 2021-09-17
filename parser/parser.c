@@ -119,6 +119,7 @@ void parseTokens() {
         } else {
             NonTerminal nonTerminal = node ->info ->parent ->nonTerminal;
             int ruleNo = getRuleNoFromTable(nonTerminal, streamEle ->token);
+            node ->info ->parent ->ruleNo = ruleNo;
             if (ruleNo == -1) {
                 if (streamEle ->token == DOLLAR) {
                     push(stack, node);
