@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include "hash_table.h"
+#define DEFAULT_NUM_BUCKETS 128
 
 /*
  * Returns number of buckets in hash table
@@ -19,12 +20,12 @@ int getNumBuckets(int arrLen) {
 /*
  * Simple hash function based on djb2 algorithm
  */
-int hashFunction(char* str, int numBuckets) {
+int hashFunction(char* key, int numBuckets) {
     // if y is a power of 2, x % y is the same as x & (y - 1)
     numBuckets--;
     int hash = 5381;
-    for(int i = 0; str[i] != '\0'; i++) {
-        hash = (((((hash << 5) & numBuckets) + hash) & numBuckets) + str[i]) & numBuckets;
+    for(int i = 0; key[i] != '\0'; i++) {
+        hash = (((((hash << 5) & numBuckets) + hash) & numBuckets) + key[i]) & numBuckets;
     }
     return hash;
 }
@@ -34,9 +35,9 @@ int hashFunction(char* str, int numBuckets) {
  * Hashes elements of arr to their corresponding array indices
  * Returns hash table
  */
-HashTable* initHashTable(char* arr[], int arrLen) {
+HashTable* initHashTable(int numElements) {
     // Initialize hash table
-    int numBuckets = getNumBuckets(arrLen);
+    int numBuckets = numElements == 0 ? DEFAULT_NUM_BUCKETS : getNumBuckets(numElements);
     HashEle** buckets = (HashEle**) malloc(numBuckets * (sizeof(HashEle*)));
     for(int i = 0; i < numBuckets; i++) {
         buckets[i] = NULL;
@@ -44,33 +45,32 @@ HashTable* initHashTable(char* arr[], int arrLen) {
     HashTable* hashTable = (HashTable*) malloc(sizeof(HashTable));
     hashTable ->buckets = buckets;
     hashTable ->numBuckets = numBuckets;
-
-    // Hash elements to their indices
-    for (int i = 0; i < arrLen; i++) {
-        int bucketNo = hashFunction(arr[i], numBuckets);
-        HashEle* ele = (HashEle*) malloc (sizeof(HashEle));
-        ele ->str = arr[i];
-        ele ->val = i;
-        ele ->next = buckets[bucketNo];
-        buckets[bucketNo] = ele;
-    }
     return hashTable;
 }
 
+void hashEleInTable(HashTable* hashTable, char* key, void* val) {
+    HashEle* ele = (HashEle*) malloc (sizeof(HashEle));
+    ele ->key = key;
+    ele ->val = val;
+    int bucketNo = hashFunction(key, hashTable ->numBuckets);
+    ele ->next = hashTable ->buckets[bucketNo];
+    hashTable ->buckets[bucketNo] = ele;
+}
+
 /*
- * Returns index of str in original array
- * Return -1 if str not present
+ * Returns index of key in original array
+ * Return -1 if key not present
  */
-int findEleInTable(HashTable* hashTable, char* str) {
-    int bucketNo = hashFunction(str, hashTable ->numBuckets);
+void* findEleInTable(HashTable* hashTable, char* key) {
+    int bucketNo = hashFunction(key, hashTable ->numBuckets);
     HashEle* head = hashTable ->buckets[bucketNo];
     while(head != NULL) {
-        if (strcmp(head ->str, str) == 0) {
+        if (strcmp(head ->key, key) == 0) {
             return head ->val;
         }
         head = head ->next;
     }
-    return -1;
+    return NULL;
 }
 
 /*
@@ -97,7 +97,7 @@ void printHashTable(HashTable* hashTable) {
         printf("Bucket %d: ", i);
         HashEle* head = hashTable ->buckets[i];
         while(head != NULL) {
-            printf("%s ", head ->str);
+            printf("%s ", head ->key);
             head = head ->next;
         }
         printf("\n");

@@ -16,15 +16,18 @@ THEN, END_IF, READ, WRITE, RETURN, CALL, RECORD, END_RECORD, ELSE};
  * Initializes a hash table for keywords
  */
 void initKeywordTable() {
-    hashTable = initHashTable(keywordStrings, NUM_KEYWORDS);
+    hashTable = initHashTable(NUM_KEYWORDS);
+    for(int i = 0; i < NUM_KEYWORDS; i++) {
+        hashEleInTable(hashTable, keywordStrings[i], &keywordTokens[i]);
+    }
 }
 
 /*
  * Keyword string --> Token
  */
 Token getKeywordIfPresent(char* lexeme) {
-    int index = findEleInTable(hashTable, lexeme);
-    return (index == -1) ? -1 : keywordTokens[index];
+    Token* tokenPtr = (Token*)findEleInTable(hashTable, lexeme);
+    return (tokenPtr == NULL) ? -1 : *tokenPtr;
 }
 
 /*

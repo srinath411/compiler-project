@@ -21,22 +21,34 @@ HashTable* nonTerminalTable = NULL;
  * Stores token strings in one hash table and non terminal strings in another hash table
  */
 void storeAllSymbols() {
-    tokenTable = initHashTable(tokenStrs, NUM_TOKENS);
-    nonTerminalTable = initHashTable(nonTerminalStrs, NUM_NON_TERMINALS);
+    tokenTable = initHashTable(NUM_TOKENS);
+    for(int i = 0; i < NUM_TOKENS; i++) {
+        Token* val = (Token*) malloc(sizeof(Token));
+        *val = i;
+        hashEleInTable(tokenTable, tokenStrs[i], val);
+    }
+    nonTerminalTable = initHashTable(NUM_NON_TERMINALS);
+    for(int i = 0; i < NUM_NON_TERMINALS; i++) {
+        NonTerminal* val = (NonTerminal*) malloc(sizeof(NonTerminal));
+        *val = i;
+        hashEleInTable(nonTerminalTable, nonTerminalStrs[i], val);
+    }
 }
 
 /*
  * Token String --> Token
  */
 int findTokenFromStr(char* str) {
-    return findEleInTable(tokenTable, str);
+    Token* tokenPtr = (Token*)findEleInTable(tokenTable, str);
+    return (tokenPtr == NULL) ? -1 : *tokenPtr;
 }
 
 /*
  * Non Terminal String --> Non Terminal
  */
 int findNonTerminalFromString(char* str) {
-    return findEleInTable(nonTerminalTable, str);
+    NonTerminal* nonTerminalPtr = (NonTerminal*) findEleInTable(nonTerminalTable, str);
+    return (nonTerminalPtr == NULL) ? -1 : *nonTerminalPtr;
 }
 
 /*
